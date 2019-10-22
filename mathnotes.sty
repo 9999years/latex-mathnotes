@@ -11,25 +11,60 @@
 \RequirePackage{kvoptions}  % More flexible package options.
 
 % Initializes complementary #1 and no#1 package options.
-\NewDocumentCommand{\mathnotes@comploption}{O{false} m}{%
-	\DeclareBoolOption[#1]{#2}%
-	\DeclareComplementaryOption{no#2}{#2}}
+\AtEndOfPackage { \cs_undefine:N \mn__compl_opt_new }
+\NewDocumentCommand \mn__compl_opt_new { O{false} m }
+  {
+    \DeclareBoolOption[#1]{#2}
+    \DeclareComplementaryOption{no#2}{#2}
+    % Don't leak implementation; when this package is over, delete the if.
+    \AtEndOfPackage
+      {
+        \mn__legacy_bool_undefine:n { \@currname @#2 }
+      }
+  }
 
-\mathnotes@comploption[true]{fonts}
-\mathnotes@comploption[true]{stix}
-\mathnotes@comploption[true]{symbols}
-\mathnotes@comploption{listings}
-\mathnotes@comploption{knowledge}
-\mathnotes@comploption{index}
-\mathnotes@comploption{footnotes}
-\mathnotes@comploption{figures}
-\let\mathnotes@comploption\relax
+\mn__compl_opt_new[true]{fonts}
+\mn__compl_opt_new[true]{stix}
+\mn__compl_opt_new[true]{symbols}
+\mn__compl_opt_new{listings}
+\mn__compl_opt_new{knowledge}
+\mn__compl_opt_new{index}
+\mn__compl_opt_new{footnotes}
+\mn__compl_opt_new{figures}
 
 \ProcessKeyvalOptions*
 
+\AtEndOfPackage { \cs_undefine:N \mn__legacy_bool_option }
+\cs_set:Npn \mn__legacy_bool_option #1
+  {
+    \bool_new:c { g__mn_#1_bool }
+    \bool_gset:cn { g__mn_#1_bool }
+      {
+        \legacy_if_p:n { mathtools@#1 }
+      }
+  }
+
+\AtEndOfPackage { \cs_undefine:N \mn__legacy_bool_options }
+\cs_set:Npn \mn__legacy_bool_options #1
+  {
+    \clist_map_function:nN { #1 } \mn__legacy_bool_option
+  }
+
+\cs_set:Npn \mn__legacy_bool_undefine:n #1
+  {
+    \cs_undefine:c { if#1 }
+    \cs_undefine:c { #1true }
+    \cs_undefine:c { #1false }
+  }
+
+\mn__legacy_bool_options
+  {
+    fonts, stix, symbols, listings, knowledge, index, footnotes, figures,
+  }
+
 % Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.
-\bool_new:N \c__mn_fontspec_bool
+\bool_new:N  \c__mn_fontspec_bool
 \bool_set:Nn \c__mn_fontspec_bool
   {
     \sys_if_engine_xetex_p: || \sys_if_engine_luatex_p:
@@ -45,223 +80,340 @@
 %   just load the stix2 fonts without the stix2 package itself, so we load
 %   amsmath before unicode-math (and the stix2 fonts)
 \RequirePackage{mathtools}
-\ifmathnotes@fonts
-  \bool_if:NT \c__mn_fontspec_bool
-    {
-      \RequirePackage{amsmath}[2013/01/14]
-      % unicode-math makes equations copy/pastable in PDF output.
-      % Note that unicode-math encapsulates the functionality of fontspec.
-      \RequirePackage[
-        warnings-off={mathtools-colon,mathtools-overbracket}
-      ]{unicode-math}
-      \ifmathnotes@stix
-        \setmainfont[
-          Extension      = .otf,
-          UprightFont    = *-Regular,
-          BoldFont       = *-Bold,
-          ItalicFont     = *-Italic,
-          BoldItalicFont = *-BoldItalic,
-        ]{STIX2Text}
-        \setmathfont[
-          Extension = .otf,
-          StylisticSet={
-            1, % better caligraphic forms
-            8, % upright integrals
-          },
-        ]{STIX2Math}
-    }
-  \else
-    % Otherwise, load non-XeTeX fallbacks.
-    \RequirePackage[upint]{stix2}
-    \RequirePackage{amsmath}[2013/01/14]
-  \fi
-\else
+\bool_if:NTF \g__mn_fonts_bool
+\legacy_if:nTF { \g__mn_fonts_bool }
+  {
+    \bool_if:NTF \c__mn_fontspec_bool
+      {
+        \RequirePackage{amsmath}[2013/01/14]
+        % unicode-math makes equations copy/pastable in PDF output.
+        % Note that unicode-math encapsulates the functionality of fontspec.
+        \RequirePackage[
+          warnings-off={mathtools-colon,mathtools-overbracket}
+        ]{unicode-math}
+        \ifmathnotes@stix
+          \setmainfont[
+            Extension      = .otf,
+            UprightFont    = *-Regular,
+            BoldFont       = *-Bold,
+            ItalicFont     = *-Italic,
+            BoldItalicFont = *-BoldItalic,
+          ]{STIX2Text}
+          \setmathfont[
+            Extension = .otf,
+            StylisticSet={
+              1, % better caligraphic forms
+              8, % upright integrals
+            },
+          ]{STIX2Math}
+      }
+      {
+        % Otherwise, load non-XeTeX fallbacks.
+        \RequirePackage[upint]{stix2}
+        \RequirePackage{amsmath}[2013/01/14]
+      }
+  }
+  {
     % No fonts
     \RequirePackage{amsmath}[2013/01/14]
-\fi
+  }
 
-\ifmathnotes@symbols
-  % Logical not
-  \@ifpackageloaded{unicode-math}
-    {\DeclareDocumentCommand{\lnot}{}{¬}}
-    {\mathchardef\Not="1218}
+\bool_if:NT \g__mn_symbols_bool
+  {
+    % Logical not
+    \@ifpackageloaded{unicode-math}
+      {\DeclareDocumentCommand{\lnot}{}{¬}}
+      {\mathchardef\Not="1218}
 
-  % Blackboard bold set symbols
-  \NewDocumentCommand{\Rational}{}{\mathbb{Q}}
-  \ProvideDocumentCommand{\Rat}{}{\Rational}
-  \ProvideDocumentCommand{\Q}{}{\Rational}
+    % Blackboard bold set symbols
+    \NewDocumentCommand{\Rational}{}{\mathbb{Q}}
+    \ProvideDocumentCommand{\Rat}{}{\Rational}
+    \ProvideDocumentCommand{\Q}{}{\Rational}
 
-  % \NewDocumentCommand{\Irrational}{}{\mathbb{I}}
-  % \ProvideDocumentCommand{\Irrat}{}{\Irrational}
-  % \ProvideDocumentCommand{\I}{}{\Irrational}
+    % \NewDocumentCommand{\Irrational}{}{\mathbb{I}}
+    % \ProvideDocumentCommand{\Irrat}{}{\Irrational}
+    % \ProvideDocumentCommand{\I}{}{\Irrational}
 
-  \NewDocumentCommand{\Natural}{}{\mathbb{N}}
-  \ProvideDocumentCommand{\Nat}{}{\Natural}
-  \ProvideDocumentCommand{\N}{}{\Natural}
+    \NewDocumentCommand{\Natural}{}{\mathbb{N}}
+    \ProvideDocumentCommand{\Nat}{}{\Natural}
+    \ProvideDocumentCommand{\N}{}{\Natural}
 
-  \NewDocumentCommand{\Integer}{}{\mathbb{Z}}
-  \ProvideDocumentCommand{\Int}{}{\Integer}
-  \ProvideDocumentCommand{\Z}{}{\Integer}
+    \NewDocumentCommand{\Integer}{}{\mathbb{Z}}
+    \ProvideDocumentCommand{\Int}{}{\Integer}
+    \ProvideDocumentCommand{\Z}{}{\Integer}
 
-  \NewDocumentCommand{\Complex}{}{\mathbb{C}}
-  \ProvideDocumentCommand{\Comp}{}{\Complex}
-  \ProvideDocumentCommand{\C}{}{\Complex}
+    \NewDocumentCommand{\Complex}{}{\mathbb{C}}
+    \ProvideDocumentCommand{\Comp}{}{\Complex}
+    \ProvideDocumentCommand{\C}{}{\Complex}
 
-  \NewDocumentCommand{\Real}{}{\mathbb{R}}
-  % It's a bit unclear to me why this is necessary, but it is; probably
-  % something to do with amssymb?
-  \AtBeginDocument{\RenewDocumentCommand{\Re}{}{\Real}}
-  \ProvideDocumentCommand{\R}{}{\Real}
+    \NewDocumentCommand{\Real}{}{\mathbb{R}}
+    % It's a bit unclear to me why this is necessary, but it is; probably
+    % something to do with amssymb?
+    \AtBeginDocument{\RenewDocumentCommand{\Re}{}{\Real}}
+    \ProvideDocumentCommand{\R}{}{\Real}
 
-  % Using the Weierstrass p here is probably a bit controversial, but I like
-  % it. I'm open to change, though...
-  \ProvideDocumentCommand{\powerset}{}{\wp}
+    % Using the Weierstrass p here is probably a bit controversial, but I like
+    % it. I'm open to change, though...
+    \ProvideDocumentCommand{\powerset}{}{\wp}
 
-  \RenewDocumentCommand{\vec}{m}{\mathbf{#1}}
+    \RenewDocumentCommand{\vec}{m}{\mathbf{#1}}
 
-  % Operator synonyms.
-  % Set intersect.
-  \ProvideDocumentCommand{\intersection}{}{\cap}
-  \ProvideDocumentCommand{\inter}{}{\cap}
-  \ProvideDocumentCommand{\bigintersection}{}{\bigcap}
-  \ProvideDocumentCommand{\biginter}{}{\bigcap}
+    % Operator synonyms.
+    % Set intersect.
+    \ProvideDocumentCommand{\intersection}{}{\cap}
+    \ProvideDocumentCommand{\inter}{}{\cap}
+    \ProvideDocumentCommand{\bigintersection}{}{\bigcap}
+    \ProvideDocumentCommand{\biginter}{}{\bigcap}
 
-  % Set union.
-  \ProvideDocumentCommand{\union}{}{\cup}
-  \ProvideDocumentCommand{\bigunion}{}{\bigcup}
-  % Disjoint union.
-  \ProvideDocumentCommand{\disjointunion}{}{\sqcup}
-  \ProvideDocumentCommand{\disunion}{}{\sqcup}
+    % Set union.
+    \ProvideDocumentCommand{\union}{}{\cup}
+    \ProvideDocumentCommand{\bigunion}{}{\bigcup}
+    % Disjoint union.
+    \ProvideDocumentCommand{\disjointunion}{}{\sqcup}
+    \ProvideDocumentCommand{\disunion}{}{\sqcup}
 
-  % Divisiblity.
-  \ProvideDocumentCommand{\divisible}{}{\mid}
-  \ProvideDocumentCommand{\div}{}{\mid}
-  % Negation.
-  \ProvideDocumentCommand{\notdivisible}{}{\nmid}
-  \ProvideDocumentCommand{\ndivisible}{}{\nmid}
-  \ProvideDocumentCommand{\notdiv}{}{\nmid}
-  \ProvideDocumentCommand{\ndiv}{}{\nmid}
+    % Divisiblity.
+    \ProvideDocumentCommand{\divisible}{}{\mid}
+    \ProvideDocumentCommand{\div}{}{\mid}
+    % Negation.
+    \ProvideDocumentCommand{\notdivisible}{}{\nmid}
+    \ProvideDocumentCommand{\ndivisible}{}{\nmid}
+    \ProvideDocumentCommand{\notdiv}{}{\nmid}
+    \ProvideDocumentCommand{\ndiv}{}{\nmid}
 
-  % Wrappers around floor and ceil.
-  \ProvideDocumentCommand{\floor}{m}{\lfloor #1\rfloor}
-  \ProvideDocumentCommand{\ceil}{m}{\lceil #1\rceil}
+    % Wrappers around floor and ceil.
+    \ProvideDocumentCommand{\floor}{m}{\lfloor #1\rfloor}
+    \ProvideDocumentCommand{\ceil}{m}{\lceil #1\rceil}
 
-  % The default empty set symbol is very ugly. Use \varnothing instead,
-  % which is less ugly.
-  \AtBeginDocument{\RenewDocumentCommand{\emptyset}{}{\varnothing}}
-  \AtBeginDocument{\RenewDocumentCommand{\es}{}{\emptyset}}
+    % The default empty set symbol is very ugly. Use \varnothing instead,
+    % which is less ugly.
+    \AtBeginDocument{\RenewDocumentCommand{\emptyset}{}{\varnothing}}
+    \AtBeginDocument{\RenewDocumentCommand{\es}{}{\emptyset}}
 
-  % Function composition. The notation g \after f helps internalize the
-  % order of operations. :)
-  \ProvideDocumentCommand{\after}{}{\circ}
+    % Function composition. The notation g \after f helps internalize the
+    % order of operations. :)
+    \ProvideDocumentCommand{\after}{}{\circ}
 
-  % Cross product.
-  \ProvideDocumentCommand{\cross}{}{\times}
+    % Cross product.
+    \ProvideDocumentCommand{\cross}{}{\times}
 
-  % Operators.
-  % Function image.
-  \DeclareMathOperator{\img}{img}
-  % Function pre-image.
-  \DeclareMathOperator{\pre}{pre}
-  % Function stabilizer.
-  \DeclareMathOperator{\Stab}{Stab}
-  % Set of a function's fixed points.
-  \DeclareMathOperator{\FixPt}{FixPt}
+    % Operators.
+    % Function image.
+    \DeclareMathOperator{\img}{img}
+    % Function pre-image.
+    \DeclareMathOperator{\pre}{pre}
+    % Function stabilizer.
+    \DeclareMathOperator{\Stab}{Stab}
+    % Set of a function's fixed points.
+    \DeclareMathOperator{\FixPt}{FixPt}
 
-  % Injective function.
-  \ProvideDocumentCommand{\injective}{}{\hookrightarrow}
-  \ProvideDocumentCommand{\inj}{}{\hookrightarrow}
-  % Surjective function.
-  \ProvideDocumentCommand{\surjective}{}{\twoheadrightarrow}
-  \ProvideDocumentCommand{\surj}{}{\twoheadrightarrow}
-  % Function restriction.
-  \ProvideDocumentCommand{\restr}{}{\restriction}
+    % Injective function.
+    \ProvideDocumentCommand{\injective}{}{\hookrightarrow}
+    \ProvideDocumentCommand{\inj}{}{\hookrightarrow}
+    % Surjective function.
+    \ProvideDocumentCommand{\surjective}{}{\twoheadrightarrow}
+    \ProvideDocumentCommand{\surj}{}{\twoheadrightarrow}
+    % Function restriction.
+    \ProvideDocumentCommand{\restr}{}{\restriction}
 
-  \DeclareDocumentCommand{\qedmark}{}{\ensuremath{\square}}
-\fi
+    \DeclareDocumentCommand{\qedmark}{}{\ensuremath{\square}}
+  }
 
 % Gives this an equation in an amsmath starred environment.
-\ProvideDocumentCommand{\numberthis}{}
-  {\tag{\theequation}\refstepcounter{equation}}
+\ProvideDocumentCommand \numberthis {}
+  {
+    \tag { \theequation }
+    \refstepcounter { equation }
+  }
+
 % Gives this equation a number and label in an amsmath starred environment.
-\ProvideDocumentCommand{\labelthis}{ m }
-  {\numberthis
-  \IfValueT{#1}{\label{#1}}}
+\ProvideDocumentCommand \labelthis { m }
+  {
+    \numberthis
+    \IfValueT { #1 }
+      {
+        \label { #1 }
+      }
+  }
 
 \RequirePackage{enumitem}
 
-\ifmathnotes@listings
-  \RequirePackage{listings}
-\fi
+\bool_if:NT \g__mn_listings_bool
+  { \RequirePackage{listings} }
+
 % If listings is loaded, make them colorful:
-\@ifundefined{lstset}{}{
-	\usepackage{xcolor}
-	\lstset{
-		basicstyle=\ttfamily,
-		language=Haskell,
-		breaklines,
-		breakatwhitespace=true,
-		tabsize=4,
-		keywordstyle={\bf\ttfamily\color[rgb]{0,.3,.7}},
-		commentstyle={\color[rgb]{0.133,0.545,0.133}},
-		stringstyle={\color[rgb]{0.75,0.49,0.07}},
-		basewidth=0.55em,
-	}
-}
+\@ifpackageloaded{listings}
+  {
+    \RequirePackage{xcolor}
+    \lstset
+      {
+        basicstyle        = \ttfamily,
+        language          = Haskell,
+        breaklines,
+        breakatwhitespace = true,
+        tabsize           = 4,
+        keywordstyle      = {\bf\ttfamily\color[rgb]{0,.3,.7}},
+        commentstyle      = {\color[rgb]{0.133,0.545,0.133}},
+        stringstyle       = {\color[rgb]{0.75,0.49,0.07}},
+        basewidth         = 0.55em,
+      }
+  }
+  {
+  }
 
 % The \emailstyle command gives the style of an email; by default, we
 % initialize it to \texttt.
-\ProvideDocumentCommand{\emailstyle}{m}{\texttt{#1}}
+\ProvideDocumentCommand \emailstyle {m} { \texttt { #1 } }
 % The \email command typesets an email; if the user has loaded the
 % hyperref package, we can add a link as well.
-\ProvideDocumentCommand{\email}{m}{%
-  \@ifpackageloaded{hyperref}%
-    {\href{mailto:#1}{\emailstyle{#1}}}%
-    {\emailstyle{#1}}}
+\ProvideDocumentCommand \email { m }
+  {
+    \@ifpackageloaded{hyperref}
+      {
+        \href{mailto:#1}{\emailstyle{#1}}
+      }
+      {
+        \emailstyle{#1}
+      }
+  }
 
 % Creates an acronym-command.
 % \newacronym[<\command>]{<text>} defines \command to be \textsc{text}.
 % \newacronym{<text>} defines \text to be \textsc{text}.
-\ProvideDocumentCommand{\newacronym}{o m}
-  % \mathnotes@acronym@cs@ is the string for the cs to be defined.
-  {\def\mathnotes@acronym@cs@{%
-    \IfValueTF{#1}%
-      {\string#1}% Use optional arg for cs.
-      {#2}}% Otherwise, use the acronym text.
-  % Ensure that the cs is undefined.
-  \@ifundefined{\mathnotes@acronym@cs@}%
-    {}%
-    {\PackageError{mathnotes}%
-      {Refusing to redefine \csname\mathnotes@acronym@cs@\endcsname as an acronym}%
-      {Pick a different destination control sequence with \protect\newacronym's
-       optional argument?}}%
-  % Redefine \mathnotes@acronym@cs@ to be the cs itself, not the string of
-  % the cs to be defined.
-  \edef\mathnotes@acronym@cs@{%
-    \IfValueTF{#1}%
-      {\noexpand#1}%
-      {\csname #2\endcsname}}%
-  % Finally, define the acronym command.
-  \expandafter\def\mathnotes@acronym@cs@{\textsc{#2}}}
+\ProvideDocumentCommand \newacronym { o m }
+  {
+    \group_begin:
+      % If we have #1, then #1 is the cs we're going to define; #1 is a cs.
+      % Otherwise, we define \#2.
+      \cs_set:Npx \mn__acronym_cs: {}
+        {
+          \IfValueTF { #1 }
+            {
+              % Use optional arg for cs.
+              \exp_not:N #1
+            }
+            {
+              % Otherwise, use the acronym text.
+              \exp_not:c { #2 }
+            }
+        }
+
+      % Ensure that the cs is undefined.
+      \cs_if_exist:cT
+        \mn__acronym_cs:
+        {
+          \PackageError { mathnotes }
+            {
+              Refusing~to~redefine~\mn__acronym_cs:~as~an~
+              acronym
+            }
+            {
+              Pick~a~different~destination~control~sequence~with~
+              \protect\newacronym's~optional~argument?
+            }
+        }
+
+      % Finally, define the acronym command.
+      \cs_new:cpn \l__mn_acronym_cs_str {}
+        {
+          \textsc { #2 }
+        }
+    \group_end:
+  }
 
 % \newacronyms takes a comma-separated list as its argument and defines them
 % all as acronyms.
-\ProvideDocumentCommand{\newacronyms}{>{\SplitList{,}} m}
-  {\ProcessList{#1}{\newacronym}}
+\ProvideDocumentCommand \newacronyms { >{\SplitList{,}} m }
+  {
+    \ProcessList { #1 } { \newacronym }
+  }
 
 % Package configuration string values.
-\define@cmdkeys{mathnotes}{instructor, course, name, email, institution, semester}
-\NewDocumentCommand{mathnotes}{ m }
-  {\setkeys{mathnotes}{#1}}
+\cs_set:Npn \mn__key_new:n #1
+  {
+    \tl_set_eq:cN { l__mn_#1_tl } \c_novalue_tl
+    \keys_define:nn { mathnotes }
+      {
+        #1 .value_required:n = true,
+        #1 .tl_set:c = l__mn_#1_tl,
+      }
+  }
 
+\cs_set:Npn \mn__keys_new:n #1
+  {
+    \clist_map_function:nN { #1 } \mn__key_new:n
+  }
+
+\mn__keys_new:n
+  {
+    instructor, course, name, email, institution, semester,
+  }
+
+\NewDocumentCommand \mathnotes { m }
+  {
+    \keys_set:nn { mathnotes } { #1 }
+  }
+
+% TODO fix this shite
 \author{%
-  \mathnotes@name%
-  \thanks{%
-    \@ifundefined{mathnotes@email}{}{\email{\mathnotes@email};}
-    \@ifundefined{mathnotes@course}{}{\mathnotes@course}
-    \@ifundefined{mathnotes@instructor}{}{taught by \mathnotes@instructor}
-    \@ifundefined{mathnotes@institution}{}{at \mathnotes@institution}
-    \@ifundefined{mathnotes@semester}{}{, \mathnotes@semester.}%
+  \tl_if_eq:NNT \l__mn_name_tl \c_novalue_tl {\tl_use:N \l__mn_name_tl }
+  \bool_if:nT
+    {
+         \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
+      || \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
+      || \tl_if_eq_p:NN \l__mn_instructor_tl \c_novalue_tl
+      || \tl_if_eq_p:NN \l__mn_institution_tl \c_novalue_tl
+      || \tl_if_eq_p:NN \l__mn_semester_tl \c_novalue_tl
+    }
+    {
+    \thanks
+      {
+        \tl_if_eq:NNF \l__mn_email_tl \c_novalue_tl
+          {
+            \email { \tl_use:N { \l__mn_email_tl } } ;
+          }
+        \tl_if_eq:NNF \l__mn_course_tl \c_novalue_tl
+          {
+            \tl_use:N \l__mn_course_tl
+          }
+        \tl_if_eq:NNF \l__mn_instructor_tl \c_novalue_tl
+          {
+            \bool_if:nTF
+              {
+                   \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
+                && \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
+              }
+              { Taught~by }
+              { taught~by }
+            \tl_use:N \l__mn_instructor_tl
+          }
+        \tl_if_eq:NNF \l__mn_institution_tl \c_novalue_tl
+          {
+            \bool_if:nTF
+              {
+                   \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
+                && \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
+                && \tl_if_eq_p:NN \l__mn_instructor_tl \c_novalue_tl
+              }
+              { At }
+              { at }
+            \tl_use:N \l__mn_institution_tl
+          }
+        \tl_if_eq:NNF \l__mn_institution_tl \c_novalue_tl
+          {
+            \bool_if:nF
+              {
+                   \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
+                && \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
+                && \tl_if_eq_p:NN \l__mn_instructor_tl \c_novalue_tl
+                && \tl_if_eq_p:NN \l__mn_institution_tl \c_novalue_tl
+              }
+              { , }
+            \tl_use:N \l__mn_semester_tl
+          }
+        .
+      }
+    }
 }
 
 
@@ -284,63 +436,86 @@
 % reset for future defn.s
 \theoremstyle{plain}
 
-\NewDocumentCommand{\TODO} {s o}
-	{\IfBooleanTF{#1}%
-		{\def\TODO@fb{\framebox[\linewidth]}}%
-		{\def\TODO@fb{\framebox}}%
+\NewDocumentCommand \TODO  {s o}
+	{\IfBooleanTF{#1}
+		{\def\TODO@fb{\framebox[\linewidth]}}
+		{\def\TODO@fb{\framebox}}
 	\expandafter
-	\TODO@fb{%
-		\textbf{TODO\IfValueT{#2}{:}}%
+	\TODO@fb{
+		\textbf{TODO\IfValueT{#2}{:}}
 		\IfValueT{#2}{ #2}}}
 
-\ifmathnotes@index
-  \mathnotes@knowledgetrue
-\fi
-
-\ifmathnotes@knowledge
-  \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
-  \knowledgeconfigure{visible anchor points=false}
-  \knowledgestyle*{intro unknown}{
-    boldface,
-    underline=false,
-    color=red,
+\bool_if:NT \g__mn_index_bool
+  {
+    \bool_set_true:N \g__mn_knowledge_bool
   }
-  \knowledgestyle*{kl unknown}{
-    underline=false,
-    color=red,
+
+\bool_if:NT \g__mn_knowledge_bool
+  {
+    \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
+    \knowledgeconfigure{visible anchor points=false}
+    \knowledgestyle*{intro unknown}
+      {
+        boldface,
+        underline=false,
+        color=red,
+      }
+    \knowledgestyle*{kl unknown}
+      {
+        underline=false,
+        color=red,
+      }
+    \knowledgestyle*{intro notion}
+      {
+        boldface,
+        underline=false,
+      }
   }
-  \knowledgestyle*{intro notion}{
-    boldface,
-    underline=false,
+
+\bool_if:NT \g__mn_index_bool
+  {
+    \makeindex
   }
-\fi
 
-\ifmathnotes@index
-  \makeindex
-\fi
+\bool_if:NT \g__mn_tabu_bool
+  {
+    \RequirePackage{multirow}
+    \RequirePackage{booktabs}
+    \RequirePackage{longtable}
+    \RequirePackage{tabu}
+    \ProvideExpandableDocumentCommand \Th { O{l} m }
+      {
+        \multicolumn
+          { 1 } % For 1 column...
+          { #1 } % ...with column-spec #1...
+          { \textbf{#2} } % Typeset #2 in bold.
+      }
+  }
 
-\ifmathnotes@tabu
-  \RequirePackage{multirow}
-  \RequirePackage{booktabs}
-  \RequirePackage{longtable}
-  \RequirePackage{tabu}
-  \ProvideExpandableDocumentCommand{\Th}{O{l} m}
-    {\multicolumn{1}{#1}{\Bf{#2}}}
-\fi
+\bool_if:NT \g__mn_figures_bool
+  {
+    % figure captions
+    \RequirePackage{graphicx}
+    \RequirePackage{caption}
+    \captionsetup
+      {
+        format = hang,
+        font   = { sf, footnotesize },
+        margin = 1in
+      }
+  }
 
-\ifmathnotes@figures
-	% figure captions
-	\RequirePackage{graphicx}
-	\RequirePackage{caption}
-	\captionsetup{format=hang, font={sf,footnotesize}, margin=1in}
-\fi
-
-\ifmathnotes@footnotes
-	\PassOptionsToPackage{bottom, hang}{footmisc}
-	\RequirePackage{footmisc}
-	\setlength{\footnotesep}{\baselineskip}
-\fi
+\bool_if:NT \g__mn_footnotes_bool
+  {
+    \PassOptionsToPackage{bottom, hang}{footmisc}
+    \RequirePackage{footmisc}
+    \setlength{\footnotesep}{\baselineskip}
+  }
 
 % Document style.
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1em}
+
+% % This has to be hooked so that it doesn't break the other bools undefined
+% % with it first.
+\AtEndOfPackage { \cs_undefine:N \mn__legacy_bool_undefine:n }
