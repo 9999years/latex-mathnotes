@@ -1,0 +1,119 @@
+\ExplSyntaxOn
+\cs_set:Npn \mn__legacy_bool_option:n #1
+  {
+    % \msg_warning:nn { mathnotes }
+      % {
+        % Adapting~\@currname @#1~into~bool~
+        % \exp_last_unbraced:Nx \protect { \cs:w g__mn#1_bool \cs_end: }
+      % }
+    \bool_new:c { g__mn_#1_bool }
+    \bool_gset:cn { g__mn_#1_bool }
+      {
+        \legacy_if_p:n { \@currname @#1 }
+      }
+  }
+
+\keys_define:nn { mn_options }
+  {
+    init .tl_set:N = \l__mn_options_init_tl ,
+    init .default:n = true ,
+    init .initial:x = \tl_use:N \c_novalue_tl ,
+
+    default .tl_set:N = \l__mn_options_default_tl ,
+    default .value_required:n = true ,
+    default .initial:o = \tl_use:N \c_novalue_tl ,
+
+    type .choice: ,
+    type .choices:nn = { bool, str }
+      { \tl_set_eq:NN \l__mn_options_type_tl \l_keys_choice_tl } ,
+    type .value_required:n = true ,
+    type .initial:n = bool ,
+  }
+
+% Initializes complementary #1 and no#1 package options.
+\tl_new:N \g__mn_after_options_hook_tl
+\NewDocumentCommand \mn__option_new { o m }
+  {
+    \group_begin:
+    \tl_if_novalue:nF { #1 }
+      { \keys_set:nn { mn_options } { #1 } }
+    \tl_set:Nn \l_tmpa_tl { bool }
+    \tl_if_eq:NNT \l__mn_options_type_tl \l_tmpa_tl
+      {
+        % If no default was given, use `false` for bools.
+        \tl_if_eq:NNT \l__mn_options_init_tl \c_novalue_tl
+          { \tl_set:Nn \l__mn_options_init_tl { false } }
+
+        \DeclareBoolOption[\l__mn_options_init_tl]{#2}
+        \DeclareComplementaryOption{no#2}{#2}
+
+        % After we process options, convert to an expl3 bool.
+        \tl_gput_right:Nn \g__mn_after_options_hook_tl
+          {
+            % Adapt the legacy bool into an expl3 bool.
+            \mn__legacy_bool_option:n { #2 }
+            % Then, delete the legacy bool.
+            \mn__legacy_bool_undefine:n { \@currname @#2 }
+          }
+      }
+
+    % For a string option:
+    \tl_set:Nn \l_tmpa_tl { str }
+    \tl_if_eq:NNT \l__mn_options_type_tl \l_tmpa_tl
+      {
+        % Declare a string option, this is a bit ugly because we want to
+        % account for the `init` and `default` options being undefined.
+        \exp_last_unbraced:Nx \DeclareStringOption
+          {
+            \tl_if_eq:NNF \l__mn_options_init_tl \c_novalue_tl
+              { [\l__mn_options_init_tl] }
+            { #2 }
+            \tl_if_eq:NNF \l__mn_options_default_tl \c_novalue_tl
+              { [\l__mn_options_default_tl] }
+          }
+
+          \tl_gput_right:Nn \g__mn_after_options_hook_tl
+            {
+              % Create the new tl for this option.
+              \tl_new:c { g__mn_#2_tl }
+              % Set it to the command kvoptions created.
+              \tl_set:co { g__mn_#2_tl } { \cs:w \@currname @#2 \cs_end: }
+              % Delete the old command.
+              \cs_undefine:c { \@currname @#2 }
+            }
+      }
+    \group_end:
+  }
+
+\cs_set:Npn \mn__process_options:
+  {
+    \ProcessKeyvalOptions*
+    \tl_use:N \g__mn_after_options_hook_tl
+  }
+
+\cs_set:Npn \mn__legacy_bool_undefine:n #1
+  {
+    \cs_undefine:c { if#1 }
+    \cs_undefine:c { #1true }
+    \cs_undefine:c { #1false }
+  }
+
+% Package configuration string values.
+% {< module >}{< family >}{< key name >}
+\cs_set:Npn \mn__key_new:nnn #1#2#3
+  {
+    \tl_set_eq:cN { l__#1_#3_tl } \c_novalue_tl
+    \keys_define:nn { #2 }
+      {
+        #1 .value_required:n = true,
+        #1 .tl_set:c = l__#1_#3_tl,
+      }
+  }
+
+\cs_set:Npn \mn__mathnotes_key_new:n #1
+  {
+    \mn__key_new:nnn { mn } { mathnotes } { #1 }
+  }
+
+\cs_set:Npn \mn__keys_new:n #1 { \clist_map_function:nN { #1 } \mn__mathnotes_key_new:n }
+\ExplSyntaxOff
