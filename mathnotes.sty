@@ -1,66 +1,28 @@
 \NeedsTeXFormat{LaTeX2e}
+\RequirePackage{expl3}
 \ProvidesExplPackage{mathnotes}{2019/10/17}{0.0.1}{Styles for mathematical
   note taking.}
+\errorcontextlines 10
 % Module 'mn'
 
-\RequirePackage{expl3}
 % Load some utility packages.
 \RequirePackage{xparse}  % Better command declarations.
 % \RequirePackage{etoolbox}  % Robust command declarations.
 \RequirePackage{xkeyval}  % Better keyval parsing.
 \RequirePackage{kvoptions}  % More flexible package options.
+\RequirePackage{./mathnotes-util}
 
-% Initializes complementary #1 and no#1 package options.
-\AtEndOfPackage { \cs_undefine:N \mn__compl_opt_new }
-\NewDocumentCommand \mn__compl_opt_new { O{false} m }
-  {
-    \DeclareBoolOption[#1]{#2}
-    \DeclareComplementaryOption{no#2}{#2}
-    % Don't leak implementation; when this package is over, delete the if.
-    \AtEndOfPackage
-      {
-        \mn__legacy_bool_undefine:n { \@currname @#2 }
-      }
-  }
+\mn__option_new[init = true]{fonts}
+\mn__option_new[init = true]{stix}
+\mn__option_new[init = true]{symbols}
+\mn__option_new{listings}
+\mn__option_new{knowledge}
+\mn__option_new{index}
+\mn__option_new{footnotes}
+\mn__option_new{figures}
+\mn__option_new{tabu}
 
-\mn__compl_opt_new[true]{fonts}
-\mn__compl_opt_new[true]{stix}
-\mn__compl_opt_new[true]{symbols}
-\mn__compl_opt_new{listings}
-\mn__compl_opt_new{knowledge}
-\mn__compl_opt_new{index}
-\mn__compl_opt_new{footnotes}
-\mn__compl_opt_new{figures}
-
-\ProcessKeyvalOptions*
-
-\AtEndOfPackage { \cs_undefine:N \mn__legacy_bool_option }
-\cs_set:Npn \mn__legacy_bool_option #1
-  {
-    \bool_new:c { g__mn_#1_bool }
-    \bool_gset:cn { g__mn_#1_bool }
-      {
-        \legacy_if_p:n { mathtools@#1 }
-      }
-  }
-
-\AtEndOfPackage { \cs_undefine:N \mn__legacy_bool_options }
-\cs_set:Npn \mn__legacy_bool_options #1
-  {
-    \clist_map_function:nN { #1 } \mn__legacy_bool_option
-  }
-
-\cs_set:Npn \mn__legacy_bool_undefine:n #1
-  {
-    \cs_undefine:c { if#1 }
-    \cs_undefine:c { #1true }
-    \cs_undefine:c { #1false }
-  }
-
-\mn__legacy_bool_options
-  {
-    fonts, stix, symbols, listings, knowledge, index, footnotes, figures,
-  }
+\mn__process_options:n { mathnotes }
 
 % Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.
@@ -81,10 +43,11 @@
 %   amsmath before unicode-math (and the stix2 fonts)
 \RequirePackage{mathtools}
 \bool_if:NTF \g__mn_fonts_bool
-\legacy_if:nTF { \g__mn_fonts_bool }
   {
+    \typeout{using fonts}
     \bool_if:NTF \c__mn_fontspec_bool
       {
+        \typeout{using fontspec}
         \RequirePackage{amsmath}[2013/01/14]
         % unicode-math makes equations copy/pastable in PDF output.
         % Note that unicode-math encapsulates the functionality of fontspec.
@@ -108,12 +71,14 @@
           ]{STIX2Math}
       }
       {
+        \typeout{not using fontspec}
         % Otherwise, load non-XeTeX fallbacks.
         \RequirePackage[upint]{stix2}
         \RequirePackage{amsmath}[2013/01/14]
       }
   }
   {
+    \typeout{not using fonts}
     % No fonts
     \RequirePackage{amsmath}[2013/01/14]
   }
@@ -122,101 +87,105 @@
   {
     % Logical not
     \@ifpackageloaded{unicode-math}
-      {\DeclareDocumentCommand{\lnot}{}{¬}}
+      {\DeclareDocumentCommand \lnot {}{¬}}
       {\mathchardef\Not="1218}
 
     % Blackboard bold set symbols
-    \NewDocumentCommand{\Rational}{}{\mathbb{Q}}
-    \ProvideDocumentCommand{\Rat}{}{\Rational}
-    \ProvideDocumentCommand{\Q}{}{\Rational}
+    \NewDocumentCommand \Rational {}{\mathbb{Q}}
+    \ProvideDocumentCommand \Rat {}{\Rational}
+    \ProvideDocumentCommand \Q {}{\Rational}
 
-    % \NewDocumentCommand{\Irrational}{}{\mathbb{I}}
-    % \ProvideDocumentCommand{\Irrat}{}{\Irrational}
-    % \ProvideDocumentCommand{\I}{}{\Irrational}
+    % \NewDocumentCommand \Irrational {}{\mathbb{I}}
+    % \ProvideDocumentCommand \Irrat {}{\Irrational}
+    % \ProvideDocumentCommand \I {}{\Irrational}
 
-    \NewDocumentCommand{\Natural}{}{\mathbb{N}}
-    \ProvideDocumentCommand{\Nat}{}{\Natural}
-    \ProvideDocumentCommand{\N}{}{\Natural}
+    \NewDocumentCommand \Natural {}{\mathbb{N}}
+    \ProvideDocumentCommand \Nat {}{\Natural}
+    \ProvideDocumentCommand \N {}{\Natural}
 
-    \NewDocumentCommand{\Integer}{}{\mathbb{Z}}
-    \ProvideDocumentCommand{\Int}{}{\Integer}
-    \ProvideDocumentCommand{\Z}{}{\Integer}
+    \NewDocumentCommand \Integer {}{\mathbb{Z}}
+    \ProvideDocumentCommand \Int {}{\Integer}
+    \ProvideDocumentCommand \Z {}{\Integer}
 
-    \NewDocumentCommand{\Complex}{}{\mathbb{C}}
-    \ProvideDocumentCommand{\Comp}{}{\Complex}
-    \ProvideDocumentCommand{\C}{}{\Complex}
+    \NewDocumentCommand \Complex {}{\mathbb{C}}
+    \ProvideDocumentCommand \Comp {}{\Complex}
+    \ProvideDocumentCommand \C {}{\Complex}
 
-    \NewDocumentCommand{\Real}{}{\mathbb{R}}
+    \NewDocumentCommand \Real {}{\mathbb{R}}
     % It's a bit unclear to me why this is necessary, but it is; probably
     % something to do with amssymb?
-    \AtBeginDocument{\RenewDocumentCommand{\Re}{}{\Real}}
-    \ProvideDocumentCommand{\R}{}{\Real}
+    \AtBeginDocument{\RenewDocumentCommand \Re {}{\Real}}
+    \ProvideDocumentCommand \R {}{\Real}
 
     % Using the Weierstrass p here is probably a bit controversial, but I like
     % it. I'm open to change, though...
-    \ProvideDocumentCommand{\powerset}{}{\wp}
+    \ProvideDocumentCommand \powerset {}{\wp}
 
-    \RenewDocumentCommand{\vec}{m}{\mathbf{#1}}
+    \RenewDocumentCommand \vec {m}{\mathbf{#1}}
 
     % Operator synonyms.
     % Set intersect.
-    \ProvideDocumentCommand{\intersection}{}{\cap}
-    \ProvideDocumentCommand{\inter}{}{\cap}
-    \ProvideDocumentCommand{\bigintersection}{}{\bigcap}
-    \ProvideDocumentCommand{\biginter}{}{\bigcap}
+    \ProvideDocumentCommand \intersection {}{\cap}
+    \ProvideDocumentCommand \inter {}{\cap}
+    \ProvideDocumentCommand \bigintersection {}{\bigcap}
+    \ProvideDocumentCommand \biginter {}{\bigcap}
 
     % Set union.
-    \ProvideDocumentCommand{\union}{}{\cup}
-    \ProvideDocumentCommand{\bigunion}{}{\bigcup}
+    \ProvideDocumentCommand \union {}{\cup}
+    \ProvideDocumentCommand \bigunion {}{\bigcup}
     % Disjoint union.
-    \ProvideDocumentCommand{\disjointunion}{}{\sqcup}
-    \ProvideDocumentCommand{\disunion}{}{\sqcup}
+    \ProvideDocumentCommand \disjointunion {}{\sqcup}
+    \ProvideDocumentCommand \disunion {}{\sqcup}
 
     % Divisiblity.
-    \ProvideDocumentCommand{\divisible}{}{\mid}
-    \ProvideDocumentCommand{\div}{}{\mid}
+    \ProvideDocumentCommand \divisible {}{\mid}
+    \ProvideDocumentCommand \div {}{\mid}
     % Negation.
-    \ProvideDocumentCommand{\notdivisible}{}{\nmid}
-    \ProvideDocumentCommand{\ndivisible}{}{\nmid}
-    \ProvideDocumentCommand{\notdiv}{}{\nmid}
-    \ProvideDocumentCommand{\ndiv}{}{\nmid}
+    \ProvideDocumentCommand \notdivisible {}{\nmid}
+    \ProvideDocumentCommand \ndivisible {}{\nmid}
+    \ProvideDocumentCommand \notdiv {}{\nmid}
+    \ProvideDocumentCommand \ndiv {}{\nmid}
 
     % Wrappers around floor and ceil.
-    \ProvideDocumentCommand{\floor}{m}{\lfloor #1\rfloor}
-    \ProvideDocumentCommand{\ceil}{m}{\lceil #1\rceil}
+    \ProvideDocumentCommand \floor {m}{\lfloor #1\rfloor}
+    \ProvideDocumentCommand \ceil {m}{\lceil #1\rceil}
 
     % The default empty set symbol is very ugly. Use \varnothing instead,
     % which is less ugly.
-    \AtBeginDocument{\RenewDocumentCommand{\emptyset}{}{\varnothing}}
-    \AtBeginDocument{\RenewDocumentCommand{\es}{}{\emptyset}}
+    \AtBeginDocument{\RenewDocumentCommand \emptyset {}{\varnothing}}
+    \AtBeginDocument{\RenewDocumentCommand \es {}{\emptyset}}
 
     % Function composition. The notation g \after f helps internalize the
     % order of operations. :)
-    \ProvideDocumentCommand{\after}{}{\circ}
+    \ProvideDocumentCommand \after {}{\circ}
 
     % Cross product.
-    \ProvideDocumentCommand{\cross}{}{\times}
+    \ProvideDocumentCommand \cross {}{\times}
 
     % Operators.
     % Function image.
-    \DeclareMathOperator{\img}{img}
+    \cs_if_free:NT \img
+      { \DeclareMathOperator \img {img} }
     % Function pre-image.
-    \DeclareMathOperator{\pre}{pre}
+    \cs_if_free:NT \pre
+      { \DeclareMathOperator \pre {pre} }
     % Function stabilizer.
-    \DeclareMathOperator{\Stab}{Stab}
+    \cs_if_free:NT \Stab
+      { \DeclareMathOperator \Stab {Stab} }
     % Set of a function's fixed points.
-    \DeclareMathOperator{\FixPt}{FixPt}
+    \cs_if_free:NT \FixPt
+      { \DeclareMathOperator \FixPt {FixPt} }
 
     % Injective function.
-    \ProvideDocumentCommand{\injective}{}{\hookrightarrow}
-    \ProvideDocumentCommand{\inj}{}{\hookrightarrow}
+    \ProvideDocumentCommand \injective {}{\hookrightarrow}
+    \ProvideDocumentCommand \inj {}{\hookrightarrow}
     % Surjective function.
-    \ProvideDocumentCommand{\surjective}{}{\twoheadrightarrow}
-    \ProvideDocumentCommand{\surj}{}{\twoheadrightarrow}
+    \ProvideDocumentCommand \surjective {}{\twoheadrightarrow}
+    \ProvideDocumentCommand \surj {}{\twoheadrightarrow}
     % Function restriction.
-    \ProvideDocumentCommand{\restr}{}{\restriction}
+    \ProvideDocumentCommand \restr {}{\restriction}
 
-    \DeclareDocumentCommand{\qedmark}{}{\ensuremath{\square}}
+    \DeclareDocumentCommand \qedmark {}{\ensuremath{\square}}
   }
 
 % Gives this an equation in an amsmath starred environment.
@@ -334,15 +303,13 @@
     \tl_set_eq:cN { l__mn_#1_tl } \c_novalue_tl
     \keys_define:nn { mathnotes }
       {
-        #1 .value_required:n = true,
-        #1 .tl_set:c = l__mn_#1_tl,
+        #1 .value_required:n = true ,
+        #1 .tl_set:c = l__mn_#1_tl ,
+        #1 .initial:o = \tl_use:N \c_novalue_tl ,
       }
   }
 
-\cs_set:Npn \mn__keys_new:n #1
-  {
-    \clist_map_function:nN { #1 } \mn__key_new:n
-  }
+\cs_set:Npn \mn__keys_new:n #1 { \clist_map_function:nN { #1 } \mn__key_new:n }
 
 \mn__keys_new:n
   {
@@ -416,25 +383,24 @@
     }
 }
 
+% \usepackage{mdframed}
 
-\usepackage{mdframed}
+% \mdtheorem{thm}{Theorem}
+% \newtheorem{shortthm}[thm]{Theorem}
+% \newtheorem{lem}{Lemma}
+% \newtheorem{cor}{Corollary}
 
-\mdtheorem{thm}{Theorem}
-\newtheorem{shortthm}[thm]{Theorem}
-\newtheorem{lem}{Lemma}
-\newtheorem{cor}{Corollary}
+% \theoremstyle{definition}
+% \newtheorem{defn}{Definition}
+% \newtheorem{notation}{Notation}
+% \newtheorem{prop}{Proposition}
 
-\theoremstyle{definition}
-\newtheorem{defn}{Definition}
-\newtheorem{notation}{Notation}
-\newtheorem{prop}{Proposition}
+% \theoremstyle{remark}
+% \newtheorem{remark}{Remark}
+% \newtheorem{ex}{Example}
 
-\theoremstyle{remark}
-\newtheorem{remark}{Remark}
-\newtheorem{ex}{Example}
-
-% reset for future defn.s
-\theoremstyle{plain}
+% % reset for future defn.s
+% \theoremstyle{plain}
 
 \NewDocumentCommand \TODO  {s o}
 	{\IfBooleanTF{#1}

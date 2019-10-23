@@ -1,15 +1,26 @@
 \ExplSyntaxOn
 \cs_set:Npn \mn__legacy_bool_option:n #1
   {
-    % \msg_warning:nn { mathnotes }
-      % {
-        % Adapting~\@currname @#1~into~bool~
-        % \exp_last_unbraced:Nx \protect { \cs:w g__mn#1_bool \cs_end: }
-      % }
-    \bool_new:c { g__mn_#1_bool }
-    \bool_gset:cn { g__mn_#1_bool }
+    \typeout
       {
-        \legacy_if_p:n { \@currname @#1 }
+        Adapting~\@currname @#1~into~bool~
+        \exp_not:c { g__mn_#1_bool }
+      }
+    \bool_new:c { g__mn_#1_bool }
+    \bool_gset:cn { g__mn_#1_bool } { \legacy_if_p:n { \@currname @#1 } }
+    \typeout
+      {
+        Boolean~\exp_not:c { \@currname @#1 }~is~
+        \legacy_if:nTF { \@currname @#1 }
+          { true }
+          { false }
+      }
+    \typeout
+      {
+        Boolean~\exp_not:c { g__mn_#1_bool }~is~
+        \bool_if:cTF { g__mn_#1_bool }
+          { true }
+          { false }
       }
   }
 
@@ -21,7 +32,7 @@
 
     default .tl_set:N = \l__mn_options_default_tl ,
     default .value_required:n = true ,
-    default .initial:o = \tl_use:N \c_novalue_tl ,
+    default .initial:x = \tl_use:N \c_novalue_tl ,
 
     type .choice: ,
     type .choices:nn = { bool, str }
@@ -37,6 +48,7 @@
     \group_begin:
     \tl_if_novalue:nF { #1 }
       { \keys_set:nn { mn_options } { #1 } }
+
     \tl_set:Nn \l_tmpa_tl { bool }
     \tl_if_eq:NNT \l__mn_options_type_tl \l_tmpa_tl
       {
@@ -85,9 +97,9 @@
     \group_end:
   }
 
-\cs_set:Npn \mn__process_options:
+\cs_set:Npn \mn__process_options:n #1
   {
-    \ProcessKeyvalOptions*
+    \ProcessKeyvalOptions { #1 }
     \tl_use:N \g__mn_after_options_hook_tl
   }
 
