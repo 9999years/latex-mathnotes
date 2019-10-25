@@ -2,7 +2,7 @@
 \RequirePackage{expl3}
 \ProvidesExplPackage{mathnotes}{2019/10/17}{0.0.1}{Styles for mathematical
   note taking.}
-\errorcontextlines 10
+\errorcontextlines 20
 % Module 'mn'
 
 % Load some utility packages.
@@ -11,6 +11,11 @@
 \RequirePackage{xkeyval}  % Better keyval parsing.
 \RequirePackage{kvoptions}  % More flexible package options.
 \RequirePackage{./mathnotes-util}
+
+\SetupKeyvalOptions
+  {
+    family = mathnotes ,
+  }
 
 \mn__option_new[init = true]{fonts}
 \mn__option_new[init = true]{stix}
@@ -44,41 +49,45 @@
 \RequirePackage{mathtools}
 \bool_if:NTF \g__mn_fonts_bool
   {
-    \typeout{using fonts}
     \bool_if:NTF \c__mn_fontspec_bool
       {
-        \typeout{using fontspec}
         \RequirePackage{amsmath}[2013/01/14]
         % unicode-math makes equations copy/pastable in PDF output.
         % Note that unicode-math encapsulates the functionality of fontspec.
         \RequirePackage[
           warnings-off={mathtools-colon,mathtools-overbracket}
         ]{unicode-math}
-        \ifmathnotes@stix
-          \setmainfont[
-            Extension      = .otf,
-            UprightFont    = *-Regular,
-            BoldFont       = *-Bold,
-            ItalicFont     = *-Italic,
-            BoldItalicFont = *-BoldItalic,
-          ]{STIX2Text}
-          \setmathfont[
-            Extension = .otf,
-            StylisticSet={
-              1, % better caligraphic forms
-              8, % upright integrals
-            },
-          ]{STIX2Math}
+        \bool_if:NT \g__mn_stix_bool
+          {
+            \setmainfont
+              [
+                Extension      = .otf ,
+                UprightFont    = *-Regular ,
+                BoldFont       = *-Bold ,
+                ItalicFont     = *-Italic ,
+                BoldItalicFont = *-BoldItalic ,
+              ]
+              { STIX2Text }
+
+            \setmathfont
+              [
+                Extension    = .otf ,
+                StylisticSet =
+                  {
+                    1 , % better caligraphic forms
+                    8 , % upright integrals
+                  } ,
+              ]
+              { STIX2Math }
+          }
       }
       {
-        \typeout{not using fontspec}
         % Otherwise, load non-XeTeX fallbacks.
         \RequirePackage[upint]{stix2}
         \RequirePackage{amsmath}[2013/01/14]
       }
   }
   {
-    \typeout{not using fonts}
     % No fonts
     \RequirePackage{amsmath}[2013/01/14]
   }
@@ -86,9 +95,9 @@
 \bool_if:NT \g__mn_symbols_bool
   {
     % Logical not
-    \@ifpackageloaded{unicode-math}
-      {\DeclareDocumentCommand \lnot {}{¬}}
-      {\mathchardef\Not="1218}
+    \mn__if_package_loaded:nTF { unicode-math }
+      { \DeclareDocumentCommand \lnot {} { \char "AC } } % 0xAC = ¬
+      { \mathchardef \Not = "1218 }
 
     % Blackboard bold set symbols
     \NewDocumentCommand \Rational {}{\mathbb{Q}}
@@ -153,7 +162,7 @@
     % The default empty set symbol is very ugly. Use \varnothing instead,
     % which is less ugly.
     \AtBeginDocument{\RenewDocumentCommand \emptyset {}{\varnothing}}
-    \AtBeginDocument{\RenewDocumentCommand \es {}{\emptyset}}
+    \ProvideDocumentCommand \es {}{\emptyset}
 
     % Function composition. The notation g \after f helps internalize the
     % order of operations. :)
@@ -211,39 +220,44 @@
   { \RequirePackage{listings} }
 
 % If listings is loaded, make them colorful:
-\@ifpackageloaded{listings}
+\mn__if_package_loaded:nT { listings }
   {
     \RequirePackage{xcolor}
     \lstset
       {
-        basicstyle        = \ttfamily,
-        language          = Haskell,
-        breaklines,
-        breakatwhitespace = true,
-        tabsize           = 4,
-        keywordstyle      = {\bf\ttfamily\color[rgb]{0,.3,.7}},
-        commentstyle      = {\color[rgb]{0.133,0.545,0.133}},
-        stringstyle       = {\color[rgb]{0.75,0.49,0.07}},
-        basewidth         = 0.55em,
+        % Use a monospace font for code listings.
+        basicstyle        = \ttfamily ,
+        language          = Mathematica ,
+        % Tab size of 4, but you should probably use spaces.
+        tabsize           = 4 ,
+        % Keywords in blue.
+        keywordstyle      = \bf\ttfamily\color[rgb]{0,.3,.7} ,
+        % Comments in green.
+        commentstyle      = \color[rgb]{0.133,0.545,0.133} ,
+        % Strings in orange.
+        stringstyle       = \color[rgb]{0.75,0.49,0.07} ,
+        % The default listings characters are too widely-spaced.
+        % 0.55em/character makes things look a lot better.
+        basewidth         = 0.55em ,
+        % Wrap lines if they're too long, and wrap at whitespace.
+        breaklines ,
+        breakatwhitespace = true ,
       }
-  }
-  {
   }
 
 % The \emailstyle command gives the style of an email; by default, we
 % initialize it to \texttt.
-\ProvideDocumentCommand \emailstyle {m} { \texttt { #1 } }
+\ProvideDocumentCommand \emailstyle { m } { \texttt{#1} }
 % The \email command typesets an email; if the user has loaded the
 % hyperref package, we can add a link as well.
-\ProvideDocumentCommand \email { m }
+\mn__if_package_loaded:nTF { hyperref }
   {
-    \@ifpackageloaded{hyperref}
-      {
-        \href{mailto:#1}{\emailstyle{#1}}
-      }
-      {
-        \emailstyle{#1}
-      }
+    \ProvideDocumentCommand \email { m }
+          { \href{mailto:#1}{\emailstyle{#1}} }
+  }
+  {
+    \ProvideDocumentCommand \email { m }
+          { \emailstyle{#1} }
   }
 
 % Creates an acronym-command.
@@ -257,19 +271,14 @@
       \cs_set:Npx \mn__acronym_cs: {}
         {
           \IfValueTF { #1 }
-            {
-              % Use optional arg for cs.
-              \exp_not:N #1
-            }
-            {
-              % Otherwise, use the acronym text.
-              \exp_not:c { #2 }
-            }
+            % Use optional arg for cs.
+            { \exp_not:N #1 }
+            % Otherwise, use the acronym text.
+            { \exp_not:c { #2 } }
         }
 
       % Ensure that the cs is undefined.
-      \cs_if_exist:cT
-        \mn__acronym_cs:
+      \cs_if_exist:cT \mn__acronym_cs:
         {
           \PackageError { mathnotes }
             {
@@ -284,9 +293,7 @@
 
       % Finally, define the acronym command.
       \cs_new:cpn \l__mn_acronym_cs_str {}
-        {
-          \textsc { #2 }
-        }
+        { \textsc { #2 } }
     \group_end:
   }
 
@@ -300,12 +307,11 @@
 % Package configuration string values.
 \cs_set:Npn \mn__key_new:n #1
   {
-    \tl_set_eq:cN { l__mn_#1_tl } \c_novalue_tl
     \keys_define:nn { mathnotes }
       {
         #1 .value_required:n = true ,
-        #1 .tl_set:c = l__mn_#1_tl ,
-        #1 .initial:o = \tl_use:N \c_novalue_tl ,
+        #1 .tl_gset:c = g__mn_#1_tl ,
+        #1 .initial:x = \tl_use:N \c_novalue_tl ,
       }
   }
 
@@ -321,67 +327,97 @@
     \keys_set:nn { mathnotes } { #1 }
   }
 
-% TODO fix this shite
-\author{%
-  \tl_if_eq:NNT \l__mn_name_tl \c_novalue_tl {\tl_use:N \l__mn_name_tl }
-  \bool_if:nT
-    {
-         \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
-      || \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
-      || \tl_if_eq_p:NN \l__mn_instructor_tl \c_novalue_tl
-      || \tl_if_eq_p:NN \l__mn_institution_tl \c_novalue_tl
-      || \tl_if_eq_p:NN \l__mn_semester_tl \c_novalue_tl
-    }
-    {
-    \thanks
+\bool_new:N \g__mn_author_set
+\cs_set:Npn \author #1
+  {
+    \bool_gset_false:N \g__mn_author_set
+    \cs_gset:Npn \@author { #1 }
+  }
+
+\prg_new_conditional:Npnn \mn__if_should_make_thanks:
+  { T, }
+  {
+    \mn__any_tl_has_value:nTF
       {
-        \tl_if_eq:NNF \l__mn_email_tl \c_novalue_tl
-          {
-            \email { \tl_use:N { \l__mn_email_tl } } ;
-          }
-        \tl_if_eq:NNF \l__mn_course_tl \c_novalue_tl
-          {
-            \tl_use:N \l__mn_course_tl
-          }
-        \tl_if_eq:NNF \l__mn_instructor_tl \c_novalue_tl
-          {
-            \bool_if:nTF
-              {
-                   \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
-                && \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
-              }
-              { Taught~by }
-              { taught~by }
-            \tl_use:N \l__mn_instructor_tl
-          }
-        \tl_if_eq:NNF \l__mn_institution_tl \c_novalue_tl
-          {
-            \bool_if:nTF
-              {
-                   \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
-                && \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
-                && \tl_if_eq_p:NN \l__mn_instructor_tl \c_novalue_tl
-              }
-              { At }
-              { at }
-            \tl_use:N \l__mn_institution_tl
-          }
-        \tl_if_eq:NNF \l__mn_institution_tl \c_novalue_tl
-          {
-            \bool_if:nF
-              {
-                   \tl_if_eq_p:NN \l__mn_email_tl \c_novalue_tl
-                && \tl_if_eq_p:NN \l__mn_course_tl \c_novalue_tl
-                && \tl_if_eq_p:NN \l__mn_instructor_tl \c_novalue_tl
-                && \tl_if_eq_p:NN \l__mn_institution_tl \c_novalue_tl
-              }
-              { , }
-            \tl_use:N \l__mn_semester_tl
-          }
-        .
+        \g__mn_email_tl ,
+        \g__mn_course_tl ,
+        \g__mn_instructor_tl ,
+        \g__mn_institution_tl ,
+        \g__mn_semester_tl ,
       }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
+\cs_set:Npn \mn__make_thanks_text
+  {
+    \tl_if_eq:NNF \g__mn_email_tl \c_novalue_tl
+      { \email { \tl_use:N { \g__mn_email_tl } } ; }
+    \tl_if_eq:NNF \g__mn_course_tl \c_novalue_tl
+      {
+        \typeout{course~has~value.}
+        \tl_use:N \g__mn_course_tl
+      }
+    \tl_if_eq:NNF \g__mn_instructor_tl \c_novalue_tl
+      {
+        \typeout{instructor~has~value.}
+        \mn__any_tl_has_value:nTF
+          {
+            \g__mn_email_tl ,
+            \g__mn_course_tl ,
+          }
+          { taught~by~ }
+          { Taught~by~ }
+        \tl_use:N \g__mn_instructor_tl
+      }
+    \tl_if_eq:NNF \g__mn_institution_tl \c_novalue_tl
+      {
+        \typeout{institution~has~value.}
+        \mn__any_tl_has_value:nTF
+          {
+            \g__mn_email_tl ,
+            \g__mn_course_tl ,
+            \g__mn_instructor_tl ,
+          }
+          { at~ }
+          { At~ }
+        \tl_use:N \g__mn_institution_tl
+      }
+    \tl_if_eq:NNF \g__mn_semester_tl \c_novalue_tl
+      {
+        \typeout{semester~has~value.}
+        \mn__any_tl_has_value:nT
+          {
+            \g__mn_email_tl ,
+            \g__mn_course_tl ,
+            \g__mn_instructor_tl ,
+            \g__mn_institution_tl ,
+          }
+          { ,~ }
+        \tl_use:N \g__mn_semester_tl
+      }
+    .
+  }
+
+\cs_set:Npn \@author
+  {
+  % If the author hasn't been set, we provide this (complicated, PITA)
+  % default; however, if we don't have any information to put in it, we
+  % still give a warning.
+  \tl_if_eq:NNTF \g__mn_name_tl \c_novalue_tl
+    {
+      % TODO: Use a real error...
+      \typeout { Warning:~No~name~given }
     }
-}
+    {
+      \tl_use:N \g__mn_name_tl
+      % Do we have any information to put in a \thanks?
+      \mn__if_should_make_thanks:T
+        {
+          \thanks { \mn__make_thanks_text }
+        }
+    }
+  }
 
 % \usepackage{mdframed}
 

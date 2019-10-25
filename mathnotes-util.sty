@@ -1,27 +1,9 @@
 \ExplSyntaxOn
+
 \cs_set:Npn \mn__legacy_bool_option:n #1
   {
-    \typeout
-      {
-        Adapting~\@currname @#1~into~bool~
-        \exp_not:c { g__mn_#1_bool }
-      }
     \bool_new:c { g__mn_#1_bool }
     \bool_gset:cn { g__mn_#1_bool } { \legacy_if_p:n { \@currname @#1 } }
-    \typeout
-      {
-        Boolean~\exp_not:c { \@currname @#1 }~is~
-        \legacy_if:nTF { \@currname @#1 }
-          { true }
-          { false }
-      }
-    \typeout
-      {
-        Boolean~\exp_not:c { g__mn_#1_bool }~is~
-        \bool_if:cTF { g__mn_#1_bool }
-          { true }
-          { false }
-      }
   }
 
 \keys_define:nn { mn_options }
@@ -41,10 +23,16 @@
     type .initial:n = bool ,
   }
 
-% Initializes complementary #1 and no#1 package options.
+% A hook which executes after \ProcessKeyvalOptions and is used to convert
+% TeX booleans and so on to LaTeX3 booleans and strings.
 \tl_new:N \g__mn_after_options_hook_tl
+% A hook used to define a particular option, allowing keys to be set only in
+% a group.
+\tl_new:N \g__mn_define_option_tl
+% Initializes complementary #1 and no#1 package options.
 \NewDocumentCommand \mn__option_new { o m }
   {
+    \tl_gclear:N \g__mn_define_option_tl
     \group_begin:
     \tl_if_novalue:nF { #1 }
       { \keys_set:nn { mn_options } { #1 } }
@@ -56,8 +44,11 @@
         \tl_if_eq:NNT \l__mn_options_init_tl \c_novalue_tl
           { \tl_set:Nn \l__mn_options_init_tl { false } }
 
-        \DeclareBoolOption[\l__mn_options_init_tl]{#2}
-        \DeclareComplementaryOption{no#2}{#2}
+        \tl_gput_right:Nx \g__mn_define_option_tl
+          {
+            \exp_not:N \DeclareBoolOption [\l__mn_options_init_tl]{#2}
+            \exp_not:N \DeclareComplementaryOption {no#2}{#2}
+          }
 
         % After we process options, convert to an expl3 bool.
         \tl_gput_right:Nn \g__mn_after_options_hook_tl
@@ -73,15 +64,14 @@
     \tl_set:Nn \l_tmpa_tl { str }
     \tl_if_eq:NNT \l__mn_options_type_tl \l_tmpa_tl
       {
-        % Declare a string option, this is a bit ugly because we want to
-        % account for the `init` and `default` options being undefined.
-        \exp_last_unbraced:Nx \DeclareStringOption
+        \tl_gput_right:No \g__mn_define_option_tl
           {
-            \tl_if_eq:NNF \l__mn_options_init_tl \c_novalue_tl
-              { [\l__mn_options_init_tl] }
-            { #2 }
-            \tl_if_eq:NNF \l__mn_options_default_tl \c_novalue_tl
-              { [\l__mn_options_default_tl] }
+            \exp_not:N \DeclareStringOption
+              \tl_if_eq:NNF \l__mn_options_init_tl \c_novalue_tl
+                { [\l__mn_options_init_tl] }
+              { #2 }
+              \tl_if_eq:NNF \l__mn_options_default_tl \c_novalue_tl
+                { [\l__mn_options_default_tl] }
           }
 
           \tl_gput_right:Nn \g__mn_after_options_hook_tl
@@ -95,6 +85,7 @@
             }
       }
     \group_end:
+    \tl_use:N \g__mn_define_option_tl
   }
 
 \cs_set:Npn \mn__process_options:n #1
@@ -128,4 +119,67 @@
   }
 
 \cs_set:Npn \mn__keys_new:n #1 { \clist_map_function:nN { #1 } \mn__mathnotes_key_new:n }
+
+\prg_new_conditional:Npnn \mn__if_package_loaded:n #1
+  { p, T, F, TF }
+  {
+    \@ifpackageloaded { #1 }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
+\prg_new_conditional:Npnn \mn__if_novalue:N #1
+  { p, T, F, TF }
+  {
+    \tl_if_eq:NNTF \c_novalue_tl #1
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+\prg_generate_conditional_variant:Nnn \mn__if_novalue:N
+  { c }
+  { p, T, F, TF }
+
+  % \cs_set:Npn \mn__has
+
+\cs_set:Npn \mn__set_true_if_has_value:N #1
+  {
+    \tl_if_eq:NNF #1 \c_novalue_tl
+      {
+        \typeout{\exp_not:N #1~has~value}
+        \clist_map_break:n
+          { \bool_set_true:N \l_tmpa_bool }
+      }
+  }
+
+\prg_new_conditional:Npnn \mn__any_tl_has_value:n #1
+  { p, T, F, TF }
+  {
+    \typeout{ Entire~list~is~\tl_to_str:n {#1} }
+    \typeout{ List~expanded:~#1 }
+    \bool_set_false:N \l_tmpa_bool
+    \bool_if:NTF \l_tmpa_bool
+      {
+        \typeout{To~start:~At~least~one~has~value}
+        }
+      {
+        \typeout{To~start:~None~has~value}
+         }
+    \clist_map_function:nN { #1 } \mn__set_true_if_has_value:N
+    \bool_if:NTF \l_tmpa_bool
+      {
+        \typeout{At~least~one~has~value}
+        \prg_return_true: }
+      {
+        \typeout{None~has~value}
+        \prg_return_false: }
+  }
+
+% \prg_new_conditional:Npnn \mn__no_tl_has_value:n #1
+  % { p, T, F, TF }
+  % {
+    % \mn__any_tl_has_value:nTF { #1 }
+      % { \prg_return_false: }
+      % { \prg_return_true: }
+  % }
+
 \ExplSyntaxOff
