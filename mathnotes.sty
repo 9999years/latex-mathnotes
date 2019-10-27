@@ -262,37 +262,30 @@
     \group_begin:
       % If we have #1, then #1 is the cs we're going to define; #1 is a cs.
       % Otherwise, we define \#2.
-      \cs_set:Npx \mn__acronym_cs: 
-        {
-          \IfValueTF { #1 }
-            % Use optional arg for cs.
-            { \exp_not:N #1 }
-            % Otherwise, use the acronym text.
-            { \exp_not:c { #2 } }
-        }
+      \IfValueTF { #1 }
+        { \cs_set:Npn \mn__acronym_cs: { \cs_to_str:N #1 } }
+        { \cs_set:Npn \mn__acronym_cs: { #2 } }
 
       % Ensure that the cs is undefined.
-      \cs_if_exist:cT \mn__acronym_cs:
+      \cs_if_exist:cT { \mn__acronym_cs: }
         {
-          \msg_error:nnnn
+          \msg_error:nnxx
             { mathnotes }
             { acronym already defined }
-            { \mn__acronym_cs: }
+            { \exp_not:c { \mn__acronym_cs: } }
             { #2 }
         }
 
       % Finally, define the acronym command.
-      \cs_new:cpn \l__mn_acronym_cs_str
+      \cs_new:cpn { \mn__acronym_cs: }
         { \textsc { #2 } }
     \group_end:
   }
 
 % \newacronyms takes a comma-separated list as its argument and defines them
 % all as acronyms.
-\ProvideDocumentCommand \newacronyms { >{\SplitList{,}} m }
-  {
-    \ProcessList { #1 } { \newacronym }
-  }
+\ProvideDocumentCommand \newacronyms { m }
+  { \clist_map_function:nN { #1 } \newacronym }
 
 % Package configuration string values.
 \keys_define:nn { mathnotes }
@@ -576,7 +569,7 @@
 
 \mdfdefinestyle { theorem }
   {
-    linewidth = 2pt ,
+    linewidth = 1.5pt ,
   }
 
 \bool_if:NT \g__mn_xcolor_bool
@@ -790,9 +783,9 @@
       { \mn__maybe_AP:N \AP }
       { } { }
 
-    \let \mn__item_orig: \item
     \cs_set:Npn \mn__use_itemAP:
       {
+        \let \mn__item_orig: \item
         \RenewDocumentCommand \item { o }
           {
             \IfNoValueTF { ##1 }
@@ -804,6 +797,7 @@
                 \mn__item_orig:
                   [
                     \mn__maybe_AP:N \knowledge_itemAP:
+                    \cs_set_eq:NN \AP \prg_do_nothing:
                     ##1
                   ]
               }
