@@ -50,4 +50,13 @@
 \makeevenhead { plain } { } { } { \thepage }
 \makeoddhead  { plain } { } { } { \thepage }
 
+\RequirePackage{etoolbox}
+\AtBeginDocument{
+    \patchcmd { \@tocmaketitle }
+      { \thispagestyle { chapter } }
+      { }
+      { }
+      { }
+  }
+
 \RequirePackage{mathnotes}
