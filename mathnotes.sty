@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplPackage{mathnotes}{2019/10/17}{0.0.1}{Styles for mathematical
+\ProvidesExplPackage{mathnotes}{${DATE}$}{${VERSION}$}{Styles for mathematical
   note taking.}
 \errorcontextlines 20
 % Module 'mn'
@@ -201,7 +201,9 @@
     % Function restriction.
     \ProvideDocumentCommand \restr {}{\restriction}
 
-    \DeclareDocumentCommand \qedmark {}{\ensuremath{\square}}
+    % d/dx
+    \ProvideDocumentCommand \dd { O{} m }{\frac{d#1}{d#2}}
+    \ProvideDocumentCommand \pd { O{} m }{\frac{\partial#1}{\partial#2}}
   }
 
 % Gives this an equation in an amsmath starred environment.

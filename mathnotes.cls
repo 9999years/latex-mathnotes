@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplClass{mathnotes}{2019/10/17}{0.0.1}{Styles for mathematical
+\ProvidesExplClass{mathnotes}{${DATE}$}{${VERSION}$}{Styles for mathematical
   note taking.}
 
 \PassOptionsToClass { openany, oneside } { memoir }
