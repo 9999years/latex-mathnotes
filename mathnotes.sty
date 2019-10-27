@@ -11,6 +11,7 @@
 \RequirePackage{xkeyval}  % Better keyval parsing.
 \RequirePackage{kvoptions}  % More flexible package options.
 \RequirePackage{./mathnotes-util}
+\RequirePackage{./mathnotes-messages}
 
 \SetupKeyvalOptions
   {
@@ -20,6 +21,9 @@
 \mn__option_new[init = true]{fonts}
 \mn__option_new[init = true]{stix}
 \mn__option_new[init = true]{symbols}
+\mn__option_new[init = true]{maketitle}
+\mn__option_new[init = true]{titles}
+\mn__option_new[init = true]{xcolor}
 \mn__option_new{listings}
 \mn__option_new{knowledge}
 \mn__option_new{index}
@@ -209,9 +213,7 @@
   {
     \numberthis
     \IfValueT { #1 }
-      {
-        \label { #1 }
-      }
+      { \label { #1 } }
   }
 
 \RequirePackage{enumitem}
@@ -268,7 +270,7 @@
     \group_begin:
       % If we have #1, then #1 is the cs we're going to define; #1 is a cs.
       % Otherwise, we define \#2.
-      \cs_set:Npx \mn__acronym_cs: {}
+      \cs_set:Npx \mn__acronym_cs: 
         {
           \IfValueTF { #1 }
             % Use optional arg for cs.
@@ -280,19 +282,15 @@
       % Ensure that the cs is undefined.
       \cs_if_exist:cT \mn__acronym_cs:
         {
-          \PackageError { mathnotes }
-            {
-              Refusing~to~redefine~\mn__acronym_cs:~as~an~
-              acronym
-            }
-            {
-              Pick~a~different~destination~control~sequence~with~
-              \protect\newacronym's~optional~argument?
-            }
+          \msg_error:nnnn
+            { mathnotes }
+            { acronym already defined }
+            { \mn__acronym_cs: }
+            { #2 }
         }
 
       % Finally, define the acronym command.
-      \cs_new:cpn \l__mn_acronym_cs_str {}
+      \cs_new:cpn \l__mn_acronym_cs_str
         { \textsc { #2 } }
     \group_end:
   }
@@ -311,7 +309,7 @@
       {
         #1 .value_required:n = true ,
         #1 .tl_gset:c = g__mn_#1_tl ,
-        #1 .initial:x = \tl_use:N \c_novalue_tl ,
+        #1 .initial:x = ,
       }
   }
 
@@ -330,68 +328,88 @@
 \bool_new:N \g__mn_author_set
 \cs_set:Npn \author #1
   {
-    \bool_gset_false:N \g__mn_author_set
+    \bool_gset_true:N \g__mn_author_set
     \cs_gset:Npn \@author { #1 }
+  }
+
+\bool_new:N \g__mn_title_set
+\cs_set:Npn \title #1
+  {
+    \bool_gset_true:N \g__mn_title_set
+    \cs_gset:Npn \@title { #1 }
   }
 
 \prg_new_conditional:Npnn \mn__if_should_make_thanks:
   { T, }
   {
-    \mn__any_tl_has_value:nTF
+    \bool_lazy_all:nTF
       {
-        \g__mn_email_tl ,
-        \g__mn_course_tl ,
-        \g__mn_instructor_tl ,
-        \g__mn_institution_tl ,
-        \g__mn_semester_tl ,
+        { \tl_if_empty_p:N \g__mn_email_tl }
+        { \tl_if_empty_p:N \g__mn_course_tl }
+        { \tl_if_empty_p:N \g__mn_instructor_tl }
+        { \tl_if_empty_p:N \g__mn_institution_tl }
+        { \tl_if_empty_p:N \g__mn_semester_tl }
       }
-      { \prg_return_true: }
       { \prg_return_false: }
+      { \prg_return_true: }
   }
 
 \cs_set:Npn \mn__make_thanks_text
   {
-    \tl_if_eq:NNF \g__mn_email_tl \c_novalue_tl
-      { \email { \tl_use:N { \g__mn_email_tl } } ; }
-    \tl_if_eq:NNF \g__mn_course_tl \c_novalue_tl
+    \tl_if_empty:NF \g__mn_email_tl
       {
-        \typeout{course~has~value.}
-        \tl_use:N \g__mn_course_tl
-      }
-    \tl_if_eq:NNF \g__mn_instructor_tl \c_novalue_tl
-      {
-        \typeout{instructor~has~value.}
-        \mn__any_tl_has_value:nTF
+        \email { \tl_use:N { \g__mn_email_tl } }
+        \bool_lazy_all:nF
           {
-            \g__mn_email_tl ,
-            \g__mn_course_tl ,
+            { \tl_if_empty_p:N \g__mn_course_tl }
+            { \tl_if_empty_p:N \g__mn_instructor_tl }
+            { \tl_if_empty_p:N \g__mn_institution_tl }
+            { \tl_if_empty_p:N \g__mn_semester_tl }
           }
-          { taught~by~ }
+          { ;~ }
+      }
+    \tl_if_empty:NF \g__mn_course_tl
+      {
+        \tl_use:N \g__mn_course_tl
+        \bool_lazy_all:nF
+          {
+            { \tl_if_empty_p:N \g__mn_instructor_tl }
+            { \tl_if_empty_p:N \g__mn_institution_tl }
+            { \tl_if_empty_p:N \g__mn_semester_tl }
+          }
+          { ~ }
+      }
+    \tl_if_empty:NF \g__mn_instructor_tl
+      {
+        \bool_lazy_all:nTF
+          {
+            { \tl_if_empty_p:N \g__mn_email_tl }
+            { \tl_if_empty_p:N \g__mn_course_tl }
+          }
           { Taught~by~ }
+          { taught~by~ }
         \tl_use:N \g__mn_instructor_tl
       }
-    \tl_if_eq:NNF \g__mn_institution_tl \c_novalue_tl
+    \tl_if_empty:NF \g__mn_institution_tl
       {
-        \typeout{institution~has~value.}
-        \mn__any_tl_has_value:nTF
+        \bool_lazy_all:nTF
           {
-            \g__mn_email_tl ,
-            \g__mn_course_tl ,
-            \g__mn_instructor_tl ,
+            { \tl_if_empty_p:N \g__mn_email_tl }
+            { \tl_if_empty_p:N \g__mn_course_tl }
+            { \tl_if_empty_p:N \g__mn_instructor_tl }
           }
-          { at~ }
           { At~ }
+          { ~at~ }
         \tl_use:N \g__mn_institution_tl
       }
-    \tl_if_eq:NNF \g__mn_semester_tl \c_novalue_tl
+    \tl_if_empty:NF \g__mn_semester_tl
       {
-        \typeout{semester~has~value.}
-        \mn__any_tl_has_value:nT
+        \bool_lazy_all:nF
           {
-            \g__mn_email_tl ,
-            \g__mn_course_tl ,
-            \g__mn_instructor_tl ,
-            \g__mn_institution_tl ,
+            { \tl_if_empty_p:N \g__mn_email_tl }
+            { \tl_if_empty_p:N \g__mn_course_tl }
+            { \tl_if_empty_p:N \g__mn_instructor_tl }
+            { \tl_if_empty_p:N \g__mn_institution_tl }
           }
           { ,~ }
         \tl_use:N \g__mn_semester_tl
@@ -406,8 +424,7 @@
   % still give a warning.
   \tl_if_eq:NNTF \g__mn_name_tl \c_novalue_tl
     {
-      % TODO: Use a real error...
-      \typeout { Warning:~No~name~given }
+      \msg_warning:nn { mathnotes } { no name }
     }
     {
       \tl_use:N \g__mn_name_tl
@@ -419,33 +436,321 @@
     }
   }
 
-% \usepackage{mdframed}
+\RenewDocumentCommand \@maketitle {}
+  {
+    \begin{center}
+      \let \footnote \thanks
 
-% \mdtheorem{thm}{Theorem}
+      % Set the title, if it exists.
+      \bool_if:NT \g__mn_title_set
+        {
+          \group_begin:
+          \HUGE
+          \bfseries
+          \@title
+          \par
+          \group_end:
+        }
+      \skip_vertical:n { 1em }
+
+      % Set the author.
+      \group_begin:
+      \LARGE
+      \lineskip 0.5em
+      \begin{tabular}[t]{c}
+        \@author
+      \end{tabular}
+      \par
+      \group_end:
+
+      % Set the date.
+      \skip_vertical:n { 0.5em }
+      \large
+      \@date
+
+    \end{center}
+    \par
+    \skip_vertical:n { 1.5em }
+  }
+
+\RenewDocumentCommand \maketitle {}
+  {
+    \par
+    \group_begin:
+      \cs_set:Npn \thefootnote
+        {
+          \@fnsymbol
+          \c@footnote
+        }
+      \cs_set:Npn \@makefnmark
+        {
+          \rlap
+            {
+              \@textsuperscript { \normalfont \@thefnmark }
+            }
+        }
+      \cs_set:Npn \@makefntext ##1
+        {
+          \parindent 1em
+          \noindent
+          \hbox_to_wd:nn
+            { 1.8em }
+            {
+              \hss
+              \@textsuperscript { \normalfont \@thefnmark }
+            }
+          ##1
+        }
+      \legacy_if:nTF { @twocolumn }
+        {
+          \if_int_compare:w \col@number = \@ne
+            \@maketitle
+          \else:
+            \twocolumn [ \@maketitle ]
+          \fi:
+        }
+        {
+          \newpage
+          \global\@topnum\z@
+          \@maketitle
+        }
+      \thispagestyle{empty}
+      \@thanks
+    \group_end:
+    \setcounter{footnote}{0}
+    % NOTE: we don't erase the definitions of \@title, \thanks, etc.
+  }
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \RequirePackage[rgb]{xcolor}
+    \providecolorset { HTML }
+      % Prefix/postfix of all color names
+      { } { }
+      {
+        \use_none:n
+        ; MNthmtitle  , 0F0066
+        ; MNthmbg     , EBFEFF
+        ; MNthmline   , 4836B3
+        ; MNextitle   , 692219
+        ; MNexbg      , FFF0EB
+        ; MNexline    , CC7468
+        ; MNdefntitle , 00540B
+        ; MNdefnline  , 196924
+        ; MNdefnbg    , EBFFED
+        ; MNnotetitle , 6B0019
+        ; MNnoteline  , CC3F60
+        ; MNnotebg    , FFF5F7
+
+        ; MNsecnum , 8015A1
+      }
+  }
+
+% To be prefaced with \exp:w
+\cs_set:Npn \mn__color:n #1
+  {
+    \bool_if:NTF \g__mn_xcolor_bool
+      {
+        \exp_end:
+        \color{#1}
+      }
+      {
+        \exp_end:
+      }
+  }
+
+\cs_set:Npn \mn__color:nn #1#2
+  {
+    \bool_if:NT \g__mn_xcolor_bool
+      {
+        \exp_end:
+        \color[#1]{#2}
+      }
+  }
+
+\RequirePackage{mdframed}
+
+\mdfdefinestyle { theorem }
+  {
+    linewidth = 2pt ,
+  }
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \mdfapptodefinestyle { theorem }
+      {
+        frametitlefont = \normalfont\bfseries\color{MNthmtitle} ,
+        linecolor = MNthmline ,
+        backgroundcolor = MNthmbg ,
+      }
+  }
+
+\mdfdefinestyle { minor-theorem }
+  {
+    style = theorem ,
+    linewidth = 0.75pt ,
+  }
+
+\mdfdefinestyle { example }
+  {
+    theoremtitlefont = \normalfont ,
+  }
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \mdfapptodefinestyle { example }
+      {
+        frametitlefont = \normalfont\bfseries\color{MNextitle} ,
+        linecolor = MNexline ,
+        backgroundcolor = MNexbg ,
+      }
+  }
+
+\mdfdefinestyle { definition }
+  {
+  }
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \mdfapptodefinestyle { definition }
+      {
+        frametitlefont = \normalfont\bfseries\color{MNdefntitle} ,
+        linecolor = MNdefnline ,
+        backgroundcolor = MNdefnbg ,
+      }
+  }
+
+\mdfdefinestyle { note }
+  {
+    topline = false ,
+    rightline = false ,
+    bottomline = false ,
+    linewidth = 2pt ,
+  }
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \mdfapptodefinestyle { note }
+      {
+        frametitlefont = \normalfont\bfseries\color{MNnotetitle} ,
+        linecolor = MNnoteline ,
+        backgroundcolor = MNnotebg ,
+      }
+  }
+
+\mdfdefinestyle { example }
+  {
+    theoremtitlefont = \normalfont ,
+  }
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \mdfapptodefinestyle { example }
+      {
+        frametitlefont = \normalfont\bfseries\color{MNextitle} ,
+        linecolor = MNexline ,
+        backgroundcolor = MNexbg ,
+      }
+  }
+
+\mdtheorem
+  [ style = theorem ]
+  { thm }
+  { Theorem }
 % \newtheorem{shortthm}[thm]{Theorem}
-% \newtheorem{lem}{Lemma}
-% \newtheorem{cor}{Corollary}
+\mdtheorem
+  [ style = minor-theorem ]
+  { lem }
+  { Lemma }
+\mdtheorem
+  [ style = minor-theorem ]
+  { cor }
+  { Corollary }
+\mdtheorem
+  [ style = minor-theorem ]
+  { prop }
+  { Proposition }
 
 % \theoremstyle{definition}
-% \newtheorem{defn}{Definition}
-% \newtheorem{notation}{Notation}
-% \newtheorem{prop}{Proposition}
+\mdtheorem
+  [ style = definition ]
+  { defn }
+  { Definition }
+\mdtheorem
+  [ style = definition ]
+  { notation }
+  { Notation }
 
 % \theoremstyle{remark}
-% \newtheorem{remark}{Remark}
-% \newtheorem{ex}{Example}
+\mdtheorem
+  [ style = example ]
+  { ex }
+  { Example }
+
+\newmdenv
+  [
+    style = note ,
+    startinnercode =
+      { \textbf { \exp:w \mn__color:n { MNnotetitle } Note: } ~ } ,
+  ]
+  { note }
+
+\newmdenv
+  [
+    style = note ,
+    startinnercode =
+      { \textbf { \exp:w \mn__color:n { MNnotetitle } Remark: }~ } ,
+  ]
+  { remark }
 
 % % reset for future defn.s
 % \theoremstyle{plain}
 
-\NewDocumentCommand \TODO  {s o}
-	{\IfBooleanTF{#1}
-		{\def\TODO@fb{\framebox[\linewidth]}}
-		{\def\TODO@fb{\framebox}}
-	\expandafter
-	\TODO@fb{
-		\textbf{TODO\IfValueT{#2}{:}}
-		\IfValueT{#2}{ #2}}}
+\NewDocumentCommand \TODO { o }
+  {
+    \framebox
+      {
+        \textbf{ TODO \IfValueT { #1 } { :~} }
+        \IfValueT { #1 } { #1 }
+      }
+  }
+
+\bool_if:NT \g__mn_titles_bool
+  {
+    \RequirePackage{titlesec}
+    % \titleformat { \command } [ shape ] { format } { label } { sep } { before-code } [ after-code ]
+    % before-code can be a command
+    \titleformat { \chapter }
+      [ block ]
+      { \bfseries \HUGE }
+      { { \exp:w \mn__color:n {MNsecnum} \thechapter} }
+      { 20pt }
+      { }
+      [ ]
+
+    \titleformat { \section }
+      [ hang ]
+      { \bfseries \LARGE }
+      { { \exp:w \mn__color:n {MNsecnum} \thesection} }
+      { 16pt }
+      { }
+      [ ]
+
+    \titleformat { \subsection }
+      [ hang ]
+      { \bfseries \Large }
+      { { \exp:w \mn__color:n {MNsecnum} \thesubsection} }
+      { 16pt }
+      { }
+      [ ]
+
+    % \titlespacing* { \command } { left } { before } { after } [ right ]
+    \titlespacing* { \chapter }       { 0em } { 0em } { 2em } [ 0em ]
+    \titlespacing* { \section }       { 0em } { 2em } { 0.5em } [ 0em ]
+    \titlespacing* { \subsection }    { 0em } { 1em } { 0em } [ 0em ]
+    \titlespacing* { \subsubsection } { 0em } { 1em } { 0em } [ 0em ]
+  }
+
 
 \bool_if:NT \g__mn_index_bool
   {

@@ -1,0 +1,23 @@
+\ExplSyntaxOn
+
+\msg_new:nnnn { mathnotes }
+  { no name }
+  {
+    No~author~name~given~but~\exp_not:N \maketitle~was~still~used.
+  }
+  {
+    Set~your~name~in~the~preamble: \\
+    \exp_not:N \mathnotes\{~name~=~Your~name~...~,~\}
+  }
+
+\msg_new:nnnn { mathnotes }
+  { acronym already defined }
+  {
+    Command~#1~already~defined;~refusing~to~redefine~as~an~acronym~for~#2.
+  }
+  {
+    Pick~a~different~destination~control~sequence~with~\protect\newacronym's~
+    optional~argument?
+  }
+
+\ExplSyntaxOff

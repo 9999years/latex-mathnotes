@@ -139,47 +139,4 @@
   { c }
   { p, T, F, TF }
 
-  % \cs_set:Npn \mn__has
-
-\cs_set:Npn \mn__set_true_if_has_value:N #1
-  {
-    \tl_if_eq:NNF #1 \c_novalue_tl
-      {
-        \typeout{\exp_not:N #1~has~value}
-        \clist_map_break:n
-          { \bool_set_true:N \l_tmpa_bool }
-      }
-  }
-
-\prg_new_conditional:Npnn \mn__any_tl_has_value:n #1
-  { p, T, F, TF }
-  {
-    \typeout{ Entire~list~is~\tl_to_str:n {#1} }
-    \typeout{ List~expanded:~#1 }
-    \bool_set_false:N \l_tmpa_bool
-    \bool_if:NTF \l_tmpa_bool
-      {
-        \typeout{To~start:~At~least~one~has~value}
-        }
-      {
-        \typeout{To~start:~None~has~value}
-         }
-    \clist_map_function:nN { #1 } \mn__set_true_if_has_value:N
-    \bool_if:NTF \l_tmpa_bool
-      {
-        \typeout{At~least~one~has~value}
-        \prg_return_true: }
-      {
-        \typeout{None~has~value}
-        \prg_return_false: }
-  }
-
-% \prg_new_conditional:Npnn \mn__no_tl_has_value:n #1
-  % { p, T, F, TF }
-  % {
-    % \mn__any_tl_has_value:nTF { #1 }
-      % { \prg_return_false: }
-      % { \prg_return_true: }
-  % }
-
 \ExplSyntaxOff
