@@ -247,21 +247,6 @@
       }
   }
 
-% The \emailstyle command gives the style of an email; by default, we
-% initialize it to \texttt.
-\ProvideDocumentCommand \emailstyle { m } { \texttt{#1} }
-% The \email command typesets an email; if the user has loaded the
-% hyperref package, we can add a link as well.
-\mn__if_package_loaded:nTF { hyperref }
-  {
-    \ProvideDocumentCommand \email { m }
-          { \href{mailto:#1}{\emailstyle{#1}} }
-  }
-  {
-    \ProvideDocumentCommand \email { m }
-          { \emailstyle{#1} }
-  }
-
 % Creates an acronym-command.
 % \newacronym[<\command>]{<text>} defines \command to be \textsc{text}.
 % \newacronym{<text>} defines \text to be \textsc{text}.
@@ -303,6 +288,16 @@
   }
 
 % Package configuration string values.
+\keys_define:nn { mathnotes }
+  {
+    date .value_required:n = true ,
+    date .code:n = \date{#1} ,
+    author .value_required:n = true ,
+    author .code:n = \author{#1} ,
+    title .value_required:n = true ,
+    title .code:n = \title{#1} ,
+  }
+
 \cs_set:Npn \mn__key_new:n #1
   {
     \keys_define:nn { mathnotes }
@@ -543,6 +538,8 @@
         ; MNnotebg    , FFF5F7
 
         ; MNsecnum , 8015A1
+
+        ; MNlink , 113DB8
       }
   }
 
@@ -751,6 +748,16 @@
     \titlespacing* { \subsubsection } { 0em } { 1em } { 0em } [ 0em ]
   }
 
+\RequirePackage[hidelinks]{hyperref}
+
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \hypersetup
+      {
+        colorlinks = true ,
+        allcolors = MNlink ,
+      }
+  }
 
 \bool_if:NT \g__mn_index_bool
   {
@@ -760,28 +767,72 @@
 \bool_if:NT \g__mn_knowledge_bool
   {
     \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
-    \knowledgeconfigure{visible anchor points=false}
-    \knowledgestyle*{intro unknown}
+
+    \providecolorset { HTML }
+      % Prefix/postfix of all color names
+      { } { }
       {
-        boldface,
-        underline=false,
-        color=red,
+        \use_none:n
+        ; MNunknown     , DE0B0F
+        ; MNunknowncont , AD483E
+        ; MNintro       , 051338
       }
-    \knowledgestyle*{kl unknown}
+
+    \knowledgeconfigure
       {
-        underline=false,
-        color=red,
+        visible~anchor~points = false
       }
-    \knowledgestyle*{intro notion}
+    \cs_set:Npn \mn__knowledgestyles:nn #1#2
       {
-        boldface,
-        underline=false,
+        \clist_map_inline:nn { #1 }
+          { \knowledgestyle* { ##1 } { #2 } }
+      }
+    % List of default styles
+    % notion, intro notion
+    % intro, intro unknown, intro unknown cont
+    % kl unknown, kl unknown cont
+    \mn__knowledgestyles:nn
+      { notion , intro~notion }
+      {
+        color = MNlink ,
+      }
+    \mn__knowledgestyles:nn
+      { intro , intro~notion , intro~unknown, intro~unknown~cont , }
+      {
+        boldface ,
+        color = MNintro ,
+      }
+    \mn__knowledgestyles:nn
+      { intro~unknown , intro~unknown~cont , kl~unknown , kl~unknown~cont , }
+      {
+        underline = false ,
+        color     = MNunknown ,
+      }
+    \mn__knowledgestyles:nn
+      { intro~unknown~cont , kl~unknown~cont , }
+      {
+        color = MNunknowncont ,
       }
   }
 
 \bool_if:NT \g__mn_index_bool
   {
     \makeindex
+  }
+
+% The \emailstyle command gives the style of an email; by default, we
+% initialize it to \texttt.
+\ProvideDocumentCommand \emailstyle { m } { \texttt{#1} }
+% The \email command typesets an email; if the user has loaded the
+% hyperref package, we can add a link as well.
+\mn__if_package_loaded:nTF { hyperref }
+  {
+    \ProvideDocumentCommand \email { m }
+          { \href{mailto:#1}{\emailstyle{#1}} }
+  }
+  {
+    \ProvideDocumentCommand \email { m }
+          { \emailstyle{#1} }
   }
 
 \bool_if:NT \g__mn_tabu_bool
@@ -816,8 +867,8 @@
   {
     \PassOptionsToPackage{bottom, hang}{footmisc}
     \RequirePackage{footmisc}
-    \setlength{\footnotesep}{\baselineskip}
   }
+\setlength{\footnotesep}{\baselineskip}
 
 % Document style.
 \setlength{\parindent}{0em}
