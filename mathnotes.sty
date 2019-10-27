@@ -10,8 +10,7 @@
 % \RequirePackage{etoolbox}  % Robust command declarations.
 \RequirePackage{xkeyval}  % Better keyval parsing.
 \RequirePackage{kvoptions}  % More flexible package options.
-\RequirePackage{./mathnotes-util}
-\RequirePackage{./mathnotes-messages}
+\RequirePackage{mathnotes-util}
 
 \SetupKeyvalOptions
   {
@@ -32,6 +31,8 @@
 \mn__option_new{tabu}
 
 \mn__process_options:n { mathnotes }
+
+\RequirePackage{mathnotes-messages}
 
 % Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.
@@ -95,6 +96,8 @@
     % No fonts
     \RequirePackage{amsmath}[2013/01/14]
   }
+
+\RequirePackage[thmmarks, amsmath, amsthm]{ntheorem}
 
 \bool_if:NT \g__mn_symbols_bool
   {
@@ -767,6 +770,44 @@
 \bool_if:NT \g__mn_knowledge_bool
   {
     \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
+
+    \bool_new:N \g__mn_noAP_bool
+    \NewDocumentCommand \noAP { }
+      { \bool_gset_true:N \g__mn_noAP_bool }
+    \cs_set:Npn \mn__maybe_AP:N #1
+      {
+        \bool_if:NTF \g__mn_noAP_bool
+          { \bool_gset_false:N \g__mn_noAP_bool }
+          { #1 }
+      }
+
+    \RequirePackage{etoolbox}
+    \pretocmd { \intro }
+      { \mn__maybe_AP:N \AP }
+      { } { }
+
+    \let \mn__item_orig: \item
+    \cs_set:Npn \mn__use_itemAP:
+      {
+        \RenewDocumentCommand \item { o }
+          {
+            \IfNoValueTF { ##1 }
+              {
+                \mn__item_orig:
+                \mn__maybe_AP:N \AP
+              }
+              {
+                \mn__item_orig:
+                  [
+                    \mn__maybe_AP:N \knowledge_itemAP:
+                    ##1
+                  ]
+              }
+          }
+      }
+    \apptocmd { \enumerate }   { \mn__use_itemAP: } { } { }
+    \apptocmd { \itemize }     { \mn__use_itemAP: } { } { }
+    \apptocmd { \description } { \mn__use_itemAP: } { } { }
 
     \providecolorset { HTML }
       % Prefix/postfix of all color names
