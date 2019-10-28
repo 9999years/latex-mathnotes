@@ -768,6 +768,21 @@
   {
     \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
 
+    % Add our patch to disable the redefined \label command.
+    \KnowledgeConfigureBooleanOption[\knowledge_configuration_label_autoscope_bool]{patch~label}
+
+    \RenewDocumentCommand\scopeLabel{m}{
+        \kl_hide_begin:
+          \bool_if:NTF
+            \knowledge_configuration_label_autoscope_bool
+            \knowledge_knowledgescope_one:n
+            \use_none:n
+            {#1}
+        \kl_hide_end:
+        \cs_if_exist:NTF\LaTeXlabel\LaTeXlabel\use_none:n{#1}
+    }
+
+    % Patch in the automatic-AP feature:
     \bool_new:N \g__mn_noAP_bool
     \NewDocumentCommand \noAP { }
       { \bool_gset_true:N \g__mn_noAP_bool }
@@ -809,6 +824,7 @@
     \apptocmd { \itemize }     { \mn__use_itemAP: } { } { }
     \apptocmd { \description } { \mn__use_itemAP: } { } { }
 
+    % Make some better styles.
     \providecolorset { HTML }
       % Prefix/postfix of all color names
       { } { }
@@ -909,11 +925,21 @@
     \PassOptionsToPackage{bottom, hang}{footmisc}
     \RequirePackage{footmisc}
   }
-\setlength{\footnotesep}{\baselineskip}
+\setlength { \footnotesep } { \baselineskip }
 
 % Document style.
-\setlength{\parindent}{0em}
-\setlength{\parskip}{1em}
+\setlength { \parindent } { 0em }
+\setlength { \parskip }   { 1em }
+% Set \parskip=0 around \tableofcontents
+\pretocmd { \tableofcontents }
+  {
+    \group_begin:
+    \setlength{\parskip}{0pt}
+  }
+  { } { }
+\apptocmd { \tableofcontents }
+  { \group_end: }
+  { } { }
 
 % % This has to be hooked so that it doesn't break the other bools undefined
 % % with it first.
