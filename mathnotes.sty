@@ -797,6 +797,8 @@
                 \mn__item_orig:
                   [
                     \mn__maybe_AP:N \knowledge_itemAP:
+                    % NOTE: this isn't expandable, which fucks up
+                    % everything.
                     \cs_set_eq:NN \AP \prg_do_nothing:
                     ##1
                   ]
