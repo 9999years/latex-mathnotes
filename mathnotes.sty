@@ -923,11 +923,21 @@
     \PassOptionsToPackage{bottom, hang}{footmisc}
     \RequirePackage{footmisc}
   }
-\setlength{\footnotesep}{\baselineskip}
+\setlength { \footnotesep } { \baselineskip }
 
 % Document style.
-\setlength{\parindent}{0em}
-\setlength{\parskip}{1em}
+\setlength { \parindent } { 0em }
+\setlength { \parskip }   { 1em }
+% Set \parskip=0 around \tableofcontents
+\pretocmd { \tableofcontents }
+  {
+    \group_begin:
+    \setlength{\parskip}{0pt}
+  }
+  { } { }
+\apptocmd { \tableofcontents }
+  { \group_end: }
+  { } { }
 
 % % This has to be hooked so that it doesn't break the other bools undefined
 % % with it first.
