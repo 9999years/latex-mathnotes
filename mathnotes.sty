@@ -14,7 +14,7 @@
 
 \SetupKeyvalOptions
   {
-    family = mathnotes ,
+    family = mn__package_options ,
   }
 
 \mn__option_new[init = true]{fonts}
@@ -30,7 +30,7 @@
 \mn__option_new{figures}
 \mn__option_new{tabu}
 
-\mn__process_options:n { mathnotes }
+\mn__process_options:n { mn__package_options }
 
 \RequirePackage{mathnotes-messages}
 
@@ -288,7 +288,7 @@
   { \clist_map_function:nN { #1 } \newacronym }
 
 % Package configuration string values.
-\keys_define:nn { mathnotes }
+\keys_define:nn { mn__main }
   {
     date .value_required:n = true ,
     date .code:n = \date{#1} ,
@@ -300,7 +300,7 @@
 
 \cs_set:Npn \mn__key_new:n #1
   {
-    \keys_define:nn { mathnotes }
+    \keys_define:nn { mn__main }
       {
         #1 .value_required:n = true ,
         #1 .tl_gset:c = g__mn_#1_tl ,
@@ -317,7 +317,7 @@
 
 \NewDocumentCommand \mathnotes { m }
   {
-    \keys_set:nn { mathnotes } { #1 }
+    \keys_set:nn { mn__main } { #1 }
   }
 
 \bool_new:N \g__mn_author_set
@@ -684,19 +684,27 @@
   { ex }
   { Example }
 
+\cs_set:Npn \mn__note_title:n #1
+  {
+    \textbf
+      {
+        \exp:w \mn__color:n { MNnotetitle }
+        #1
+      }
+    ~
+  }
+
 \newmdenv
   [
     style = note ,
-    startinnercode =
-      { \textbf { \exp:w \mn__color:n { MNnotetitle } Note: } ~ } ,
+    startinnercode = \mn__note_title:n { Note: } ,
   ]
   { note }
 
 \newmdenv
   [
     style = note ,
-    startinnercode =
-      { \textbf { \exp:w \mn__color:n { MNnotetitle } Remark: }~ } ,
+    startinnercode = \mn__note_title:n { Remark: } ,
   ]
   { remark }
 
@@ -712,41 +720,41 @@
       }
   }
 
-\bool_if:NT \g__mn_titles_bool
-  {
-    \RequirePackage{titlesec}
-    % \titleformat { \command } [ shape ] { format } { label } { sep } { before-code } [ after-code ]
-    % before-code can be a command
-    \titleformat { \chapter }
-      [ block ]
-      { \bfseries \HUGE }
-      { { \exp:w \mn__color:n {MNsecnum} \thechapter} }
-      { 20pt }
-      { }
-      [ ]
+% \bool_if:NT \g__mn_titles_bool
+  % {
+    % \RequirePackage{titlesec}
+    % % \titleformat { \command } [ shape ] { format } { label } { sep } { before-code } [ after-code ]
+    % % before-code can be a command
+    % \titleformat { \chapter }
+      % [ block ]
+      % { \bfseries \HUGE }
+      % { { \exp:w \mn__color:n {MNsecnum} \thechapter} }
+      % { 20pt }
+      % { }
+      % [ ]
 
-    \titleformat { \section }
-      [ hang ]
-      { \bfseries \LARGE }
-      { { \exp:w \mn__color:n {MNsecnum} \thesection} }
-      { 16pt }
-      { }
-      [ ]
+    % \titleformat { \section }
+      % [ hang ]
+      % { \bfseries \LARGE }
+      % { { \exp:w \mn__color:n {MNsecnum} \thesection} }
+      % { 16pt }
+      % { }
+      % [ ]
 
-    \titleformat { \subsection }
-      [ hang ]
-      { \bfseries \Large }
-      { { \exp:w \mn__color:n {MNsecnum} \thesubsection} }
-      { 16pt }
-      { }
-      [ ]
+    % \titleformat { \subsection }
+      % [ hang ]
+      % { \bfseries \Large }
+      % { { \exp:w \mn__color:n {MNsecnum} \thesubsection} }
+      % { 16pt }
+      % { }
+      % [ ]
 
-    % \titlespacing* { \command } { left } { before } { after } [ right ]
-    \titlespacing* { \chapter }       { 0em } { 0em } { 2em } [ 0em ]
-    \titlespacing* { \section }       { 0em } { 2em } { 0.5em } [ 0em ]
-    \titlespacing* { \subsection }    { 0em } { 1em } { 0em } [ 0em ]
-    \titlespacing* { \subsubsection } { 0em } { 1em } { 0em } [ 0em ]
-  }
+    % % \titlespacing* { \command } { left } { before } { after } [ right ]
+    % \titlespacing* { \chapter }       { 0em } { 0em } { 2em } [ 0em ]
+    % \titlespacing* { \section }       { 0em } { 2em } { 0.5em } [ 0em ]
+    % \titlespacing* { \subsection }    { 0em } { 1em } { 0em } [ 0em ]
+    % \titlespacing* { \subsubsection } { 0em } { 1em } { 0em } [ 0em ]
+  % }
 
 \RequirePackage[hidelinks]{hyperref}
 
