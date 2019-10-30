@@ -3,6 +3,8 @@
 \ProvidesExplClass{mathnotes-hw}{${DATE}$}{${VERSION}$}{Companion styles
   to mathnotes for typeset homework assignments.}
 
+\PassOptionsToPackage{noxcolor}{mathnotes}
+
 \RequirePackage{kvoptions}
 \DeclareDefaultOption
   {
@@ -75,6 +77,17 @@
   }
   {
     \end{mdframed}
+  }
+
+\NewDocumentCommand \prob
+  {
+    O{} % Problem number or options
+    m % Problem text
+  }
+  {
+    \begin{problem}[#1]
+      #2
+    \end{problem}
   }
 
 \cs_set:Npn \mn__add_par_arg_to_sectioning_cmd:N #1
