@@ -691,7 +691,7 @@
         \exp:w \mn__color:n { MNnotetitle }
         #1
       }
-    ~
+    \skip_horizontal:n { 1em plus 0.75em minus 0.5em }
   }
 
 \newmdenv
@@ -707,6 +707,13 @@
     startinnercode = \mn__note_title:n { Remark: } ,
   ]
   { remark }
+
+\newmdenv
+  [
+    style = note ,
+    startinnercode = \mn__note_title:n { Abuse of notation: } ,
+  ]
+  { abuse-of-notation }
 
 % % reset for future defn.s
 % \theoremstyle{plain}
