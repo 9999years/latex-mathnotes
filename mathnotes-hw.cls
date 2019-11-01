@@ -162,3 +162,5 @@
   }
 
 \headstyles { mathnotes-hw }
+
+\setlength{\columnsep}{3em}
