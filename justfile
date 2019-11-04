@@ -19,4 +19,3 @@ install texmf:
 	just _dir-no-pdf
 	install -d '{{ texmf }}/tex/latex/{{ package }}'
 	cd '{{ package }}' && install -m 644 {{ dist_files }} '{{ texmf }}/tex/latex/{{ package }}'
-	ls -la '{{ texmf }}/tex/latex/{{ package }}'
