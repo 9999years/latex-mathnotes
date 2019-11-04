@@ -128,9 +128,6 @@
     \ProvideDocumentCommand \C {}{\Complex}
 
     \NewDocumentCommand \Real {}{\mathbb{R}}
-    % It's a bit unclear to me why this is necessary, but it is; probably
-    % something to do with amssymb?
-    \AtBeginDocument{\RenewDocumentCommand \Re {}{\Real}}
     \ProvideDocumentCommand \R {}{\Real}
 
     % Using the Weierstrass p here is probably a bit controversial, but I like
@@ -684,6 +681,8 @@
   { ex }
   { Example }
 
+\skip_new:N \mn__note_title_after_skip
+\skip_set:Nn \mn__note_title_after_skip { 1em plus 0.25em minus 0.75em }
 \cs_set:Npn \mn__note_title:n #1
   {
     \textbf
@@ -691,7 +690,7 @@
         \exp:w \mn__color:n { MNnotetitle }
         #1
       }
-    ~
+    \skip_horizontal:N \mn__note_title_after_skip
   }
 
 \newmdenv
