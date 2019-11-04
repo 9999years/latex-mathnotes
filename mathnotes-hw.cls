@@ -30,10 +30,19 @@
     \int_incr:N \mn__problems_int
   }
 
+\keys_define:nn { mn__main }
+  {
+    problem~string .value_required:n = true ,
+    problem~string .tl_set:N = \mn__problem_string_tl ,
+  }
+
 \keys_define:nn { mn__problem }
   {
     number .value_required:n = true ,
     number .tl_set:N = \mn__problem_number_tl ,
+
+    label .value_required:n = true ,
+    label .tl_set:N = \mn__problem_label_tl ,
 
     % Treat unknown keys as the problem number; this lets us avoid having
     % 2 or more optional arguments.
@@ -52,6 +61,22 @@
         } ,
   }
 
+\cs_set:Npn \mn__problem_title:
+  {
+    % A string like "Problem" or "Exercise" or "Question"
+    \tl_use:N \mn__problem_string_tl
+    % The problem number. I should probably have some sort of auto-incrementing
+    % number...?
+    \tl_if_empty:NF \mn__problem_number_tl
+      {
+        % Literal space.
+        \
+        \tl_use:N \mn__problem_number_tl
+      }
+    % The text after the problem, nominally a period (".").
+    \tl_use:N \mn__problem_after_tl
+  }
+
 \NewDocumentEnvironment { problem }
   {
     O{} % Problem number or options
@@ -63,15 +88,14 @@
         style = note ,
         startinnercode = \mn__note_title:n
           {
-            \tl_use:N \mn__problem_string_tl
-            \tl_if_empty:NF \mn__problem_number_tl
+            \tl_if_empty:NF \mn__problem_label_tl
               {
-                % Literal space
-                \
-                \tl_use:N \mn__problem_number_tl
+                \phantomsection
+                \cs_set:Npx \@currentlabel { \mn__problem_number_tl }
+                \cs_set:Npx \@currentlabelname { \mn__problem_title: }
+                \exp_after:wN \label { \mn__problem_label_tl }
               }
-            \tl_use:N \mn__problem_after_tl
-            \skip_horizontal:n { 1em plus 0.25em minus 0.75em }
+            \mn__problem_title:
           } ,
       ]
   }
@@ -162,3 +186,5 @@
   }
 
 \headstyles { mathnotes-hw }
+
+\setlength{\columnsep}{3em}
