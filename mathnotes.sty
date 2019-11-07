@@ -125,7 +125,17 @@
 
     \NewDocumentCommand \Complex {}{\mathbb{C}}
     \ProvideDocumentCommand \Comp {}{\Complex}
-    \ProvideDocumentCommand \C {}{\Complex}
+    % Renew \C to mean \Complex in math-mode; normally, \C just gives an
+    % error in math-mode.
+    \AtBeginDocument
+      {
+        \cs_set_eq:NN \mn__C_old \C
+        \RenewDocumentCommand \C {}{
+          \mode_if_math:TF
+            { \Complex } % Complex set
+            { \mn__C_old } % Copyright sign
+        }
+      }
 
     \NewDocumentCommand \Real {}{\mathbb{R}}
     \ProvideDocumentCommand \R {}{\Real}
@@ -812,25 +822,30 @@
       { \mn__maybe_AP:N \AP }
       { } { }
 
+    \bool_new:N \l__mn_using_itemAP
     \cs_set:Npn \mn__use_itemAP:
       {
-        \let \mn__item_orig: \item
-        \RenewDocumentCommand \item { o }
+        \bool_if:NF \l__mn_using_itemAP
           {
-            \IfNoValueTF { ##1 }
+            \let \mn__item_orig: \item
+            \bool_set_true:N \l__mn_using_itemAP
+            \RenewDocumentCommand \item { o }
               {
-                \mn__item_orig:
-                \mn__maybe_AP:N \AP
-              }
-              {
-                \mn__item_orig:
-                  [
-                    \mn__maybe_AP:N \knowledge_itemAP:
-                    % NOTE: this isn't expandable, which fucks up
-                    % everything.
-                    \cs_set_eq:NN \AP \prg_do_nothing:
-                    ##1
-                  ]
+                \IfNoValueTF { ##1 }
+                  {
+                    \mn__item_orig:
+                    \mn__maybe_AP:N \AP
+                  }
+                  {
+                    \mn__item_orig:
+                      [
+                        \mn__maybe_AP:N \knowledge_itemAP:
+                        % NOTE: this isn't expandable, which fucks up
+                        % everything.
+                        \cs_set_eq:NN \AP \prg_do_nothing:
+                        ##1
+                      ]
+                  }
               }
           }
       }
