@@ -48,6 +48,7 @@
 
 \LoadClass{memoir}
 \setsecnumdepth{subsubsection}
+\settocdepth{subsubsection}
 \nouppercaseheads
 \makeevenfoot { plain } { } { } { }
 \makeoddfoot  { plain } { } { } { }

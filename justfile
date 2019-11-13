@@ -6,7 +6,7 @@ version_token := '${VERSION}$'
 date_token := '${DATE}$'
 
 needs_version := "mathnotes.sty mathnotes.cls"
-dist_files := "mathnotes.sty mathnotes.cls mathnotes-util.sty mathnotes-messages.sty mathnotes-hw.cls"
+dist_files := "mathnotes.sty mathnotes.cls mathnotes-util.sty mathnotes-messages.sty mathnotes-hw.cls mathnotes-formula-sheet.cls"
 
 _dir-no-pdf:
 	mkdir -p '{{ package }}'

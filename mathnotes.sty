@@ -297,12 +297,12 @@
 % Package configuration string values.
 \keys_define:nn { mn__main }
   {
-    date .value_required:n = true ,
-    date .code:n = \date{#1} ,
+    date   .value_required:n = true ,
+    date   .code:n           = \date{#1} ,
     author .value_required:n = true ,
-    author .code:n = \author{#1} ,
-    title .value_required:n = true ,
-    title .code:n = \title{#1} ,
+    author .code:n           = \author{#1} ,
+    title  .value_required:n = true ,
+    title  .code:n           = \title{#1} ,
   }
 
 \cs_set:Npn \mn__key_new:n #1
