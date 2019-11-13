@@ -85,7 +85,7 @@
   { T, }
   {
     \int_compare:nNnTF
-      { \g__mn_fs_columns } = { \c_one_int }
+      { \g__mn_fs_columns_int } = { \c_one_int }
       { \prg_return_false: }
       { \prg_return_true: }
   }
@@ -96,25 +96,42 @@
     \scriptsize
     \mn__if_should_use_multicols:T
       {
-        \begin{multicols}
+        \begin
           {
-            \int_use:N \g__mn_fs_columns
+            multicols
+            \bool_if:NF \g__mn_should_balance_multicols_bool
+              { * }
+          }
+          {
+            \int_use:N \g__mn_fs_columns_int
           }
       }
+    \skip_set:Nn \abovedisplayskip { 0pt }
+    \skip_set:Nn \belowdisplayskip { 0pt }
   }
 
 \AtEndDocument
   {
     \mn__if_should_use_multicols:T
       {
-        \end{multicols}
+        \end
+          {
+            multicols
+            \bool_if:NF \g__mn_should_balance_multicols_bool
+              { * }
+          }
       }
   }
 
+\bool_new:N \g__mn_should_balance_multicols_bool
+
 \keys_define:nn { mn__main }
   {
-    columns .int_set:N = \g__mn_fs_columns ,
+    columns .int_set:N = \g__mn_fs_columns_int ,
     columns .initial:x = 3 ,
+
+    balance~columns .default:n = true ,
+    balance~columns .bool_set:N = \g__mn_should_balance_multicols_bool ,
 
     width .value_required:n = true ,
     width .code:n = \geometry{ paperwidth = #1 } ,
@@ -129,3 +146,5 @@
     margin = 0.1in ,
   ]
   { geometry }
+
+\skip_set:Nn \parskip { 0.25em }
