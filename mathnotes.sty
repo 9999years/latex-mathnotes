@@ -213,6 +213,10 @@
     \ProvideDocumentCommand \pd { O{} m }{\frac{\partial#1}{\partial#2}}
     \ProvideDocumentCommand \gradient {}{\nabla}
     \ProvideDocumentCommand \grad {}{\nabla}
+    \cs_if_free:NT \curl
+      { \DeclareMathOperator \curl {curl} }
+    \cs_if_free:NT \dive
+      { \DeclareMathOperator \dive {div} }
   }
 
 % Gives this an equation in an amsmath starred environment.
@@ -716,6 +720,13 @@
     startinnercode = \mn__note_title:n { Remark: } ,
   ]
   { remark }
+
+\newmdenv
+  [
+    style = note ,
+    startinnercode = \mn__note_title:n { Hint: } ,
+  ]
+  { hint }
 
 \newmdenv
   [

@@ -148,3 +148,9 @@
   { geometry }
 
 \skip_set:Nn \parskip { 0.25em }
+
+\RequirePackage { enumitem }
+\setlist
+  {
+    nosep
+  }
