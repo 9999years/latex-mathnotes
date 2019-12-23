@@ -1,4 +1,7 @@
-\ExplSyntaxOn
+\NeedsTeXFormat{LaTeX2e}
+\RequirePackage{expl3}
+\ProvidesExplPackage{mathnotes-util}{${DATE}$}{${VERSION}$}{Utility commands
+  for mathnotes.}
 
 \cs_set:Npn \mn__legacy_bool_option:n #1
   {
@@ -138,5 +141,3 @@
 \prg_generate_conditional_variant:Nnn \mn__if_novalue:N
   { c }
   { p, T, F, TF }
-
-\ExplSyntaxOff
