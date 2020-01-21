@@ -507,19 +507,17 @@
             }
           ##1
         }
-      \legacy_if:nTF { @twocolumn }
-        {
-          \if_int_compare:w \col@number = \@ne
-            \@maketitle
-          \else:
-            \twocolumn [ \@maketitle ]
-          \fi:
-        }
-        {
-          \newpage
-          \global\@topnum\z@
+      \if@twocolumn
+        \if_int_compare:w \col@number = \@ne
           \@maketitle
-        }
+        \else:
+          \twocolumn [ \@maketitle ]
+        \fi:
+      \else
+        \newpage
+        \global\@topnum\z@
+        \@maketitle
+      \fi
       \thispagestyle{empty}
       \@thanks
     \group_end:
