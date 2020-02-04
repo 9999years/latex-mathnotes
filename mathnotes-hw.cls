@@ -14,26 +14,26 @@
 
 \LoadClass{mathnotes}
 
-\int_new:N \mn__problems_int
-\int_set_eq:NN \mn__problems_int \c_one_int
+\int_new:N \g__mn_problems_int
+\int_set_eq:NN \g__mn_problems_int \c_one_int
 
-\tl_new:N \mn__problem_string_tl
-\tl_set:Nn \mn__problem_string_tl { Problem }
+\tl_new:N \g__mn_problem_string_tl
+\tl_set:Nn \g__mn_problem_string_tl { Problem }
 
-\tl_new:N \mn__problem_after_tl
-\tl_set:Nn \mn__problem_after_tl { . }
+\tl_new:N \g__mn_problem_after_tl
+\tl_set:Nn \g__mn_problem_after_tl { . }
 
 \tl_new:N \mn__problem_number_tl
 \tl_set:Nn \mn__problem_number_tl
   {
-    \int_to_arabic:n { \mn__problems_int }
-    \int_incr:N \mn__problems_int
+    \int_to_arabic:n { \g__mn_problems_int }
+    \int_gincr:N \g__mn_problems_int
   }
 
 \keys_define:nn { mn__main }
   {
     problem~string .value_required:n = true ,
-    problem~string .tl_set:N = \mn__problem_string_tl ,
+    problem~string .tl_set:N = \g__mn_problem_string_tl ,
   }
 
 \keys_define:nn { mn__problem }
@@ -64,7 +64,7 @@
 \cs_set:Npn \mn__problem_title:
   {
     % A string like "Problem" or "Exercise" or "Question"
-    \tl_use:N \mn__problem_string_tl
+    \tl_use:N \g__mn_problem_string_tl
     % The problem number. I should probably have some sort of auto-incrementing
     % number...?
     \tl_if_empty:NF \mn__problem_number_tl
@@ -74,7 +74,7 @@
         \tl_use:N \mn__problem_number_tl
       }
     % The text after the problem, nominally a period (".").
-    \tl_use:N \mn__problem_after_tl
+    \tl_use:N \g__mn_problem_after_tl
   }
 
 \NewDocumentEnvironment { problem }
