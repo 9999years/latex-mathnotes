@@ -11,7 +11,7 @@
 \seq_set_from_clist:Nn \g__mn_class_options_seq
   {
     fonts, stix, symbols, maketitle, titles, xcolor, listings, knowledge,
-    index, footnotes, figures, tabu,
+    index, footnotes, figures, tabu, kindle,
   }
 
 \DeclareDefaultOption

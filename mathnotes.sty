@@ -29,10 +29,20 @@
 \mn__option_new{footnotes}
 \mn__option_new{figures}
 \mn__option_new{tabu}
+\mn__option_new{kindle}
 
 \mn__process_options:n { mn__package_options }
 
 \RequirePackage{mathnotes-messages}
+
+\bool_if:NT \g__mn_kindle_bool
+  {
+    \RequirePackage[
+        paperwidth=9cm,
+        paperheight=12.2cm,
+        margin=0cm,
+    ]{geometry}
+  }
 
 % Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.
@@ -118,10 +128,16 @@
     \ProvideDocumentCommand \Comp {}{\Complex}
     % Renew \C to mean \Complex in math-mode; normally, \C just gives an
     % error in math-mode.
+    % ...if \C isn't defined, just define it normally.
     \AtBeginDocument
       {
-        \cs_set_eq:NN \mn__C_old \C
-        \RenewDocumentCommand \C {}{
+        \cs_if_free:NTF \C
+          { \NewDocumentCommand }
+          {
+            \cs_set_eq:NN \mn__C_old \C
+            \RenewDocumentCommand
+          }
+        \C {}{
           \mode_if_math:TF
             { \Complex } % Complex set
             { \mn__C_old } % Copyright sign
