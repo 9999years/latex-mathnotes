@@ -64,26 +64,17 @@
         ]{unicode-math}
         \bool_if:NT \g__mn_stix_bool
           {
-            \setmainfont
-              [
-                Extension      = .otf ,
-                UprightFont    = *-Regular ,
-                BoldFont       = *-Bold ,
-                ItalicFont     = *-Italic ,
-                BoldItalicFont = *-BoldItalic ,
-              ]
-              { STIX2Text }
+            \setmainfont { STIX~Two~Text }
 
             \setmathfont
               [
-                Extension    = .otf ,
                 StylisticSet =
                   {
                     1 , % better caligraphic forms
                     8 , % upright integrals
                   } ,
               ]
-              { STIX2Math }
+              { STIX~Two~Math }
           }
       }
       {
@@ -198,6 +189,9 @@
     % Set of a function's fixed points.
     \cs_if_free:NT \FixPt
       { \DeclareMathOperator \FixPt {FixPt} }
+    % Identity function
+    \cs_if_free:NT \id
+      { \DeclareMathOperator \id {id} }
 
     % Injective function.
     \ProvideDocumentCommand \injective {}{\hookrightarrow}

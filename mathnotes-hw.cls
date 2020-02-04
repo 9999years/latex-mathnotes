@@ -26,7 +26,7 @@
 \tl_new:N \mn__problem_number_tl
 \tl_set:Nn \mn__problem_number_tl
   {
-    \arabic { \mn__problems_int }
+    \int_to_arabic:n { \mn__problems_int }
     \int_incr:N \mn__problems_int
   }
 

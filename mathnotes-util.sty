@@ -6,7 +6,11 @@
 \cs_set:Npn \mn__legacy_bool_option:n #1
   {
     \bool_new:c { g__mn_#1_bool }
-    \bool_gset:cn { g__mn_#1_bool } { \legacy_if_p:n { \@currname @#1 } }
+    \csname if\@currname @#1 \endcsname
+      \bool_gset_true:c { g__mn_#1_bool }
+    \else
+      \bool_gset_false:c { g__mn_#1_bool }
+    \fi
   }
 
 \keys_define:nn { mn_options }
