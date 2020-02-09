@@ -147,7 +147,7 @@
           }
         % Save the original command so we can use it as a single token.
         \cs_set_eq:Nc \mn__orig_sectioning_cmd { mn__\cs_to_str:N #1 _old }
-        \exp_after:wN \mn__orig_sectioning_cmd
+        \exp_last_unbraced:Ne \mn__orig_sectioning_cmd
           {
             % Propagate the star.
             \IfBooleanT { ##1 } { * }
