@@ -1,11 +1,11 @@
-export date := "2019/10/27"
+export date := "2020/02/10"
 export version := "0.0.1"
 export package := "mathnotes"
 
 version_token := '${VERSION}$'
 date_token := '${DATE}$'
 
-needs_version := "mathnotes.sty mathnotes.cls"
+needs_version := "mathnotes.sty mathnotes.cls mathnotes-util.sty mathnotes-messages.sty mathnotes-hw.cls mathnotes-formula-sheet.cls"
 dist_files := "mathnotes.sty mathnotes.cls mathnotes-util.sty mathnotes-messages.sty mathnotes-hw.cls mathnotes-formula-sheet.cls"
 
 _dir-no-pdf:
