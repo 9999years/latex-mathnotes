@@ -308,6 +308,11 @@
     author .code:n           = \author{#1} ,
     title  .value_required:n = true ,
     title  .code:n           = \title{#1} ,
+
+    generate~thanks .value_required:n = false ,
+    generate~thanks .bool_set:N = \g__mn_should_make_thanks ,
+    generate~thanks .default:n = true ,
+    generate~thanks .initial:n = true ,
   }
 
 \cs_set:Npn \mn__key_new:n #1
@@ -349,16 +354,20 @@
 \prg_new_conditional:Npnn \mn__if_should_make_thanks:
   { T, }
   {
-    \bool_lazy_all:nTF
+    \bool_if:NTF \g__mn_should_make_thanks
       {
-        { \tl_if_empty_p:N \g__mn_email_tl }
-        { \tl_if_empty_p:N \g__mn_course_tl }
-        { \tl_if_empty_p:N \g__mn_instructor_tl }
-        { \tl_if_empty_p:N \g__mn_institution_tl }
-        { \tl_if_empty_p:N \g__mn_semester_tl }
+        \bool_lazy_all:nTF
+          {
+            { \tl_if_empty_p:N \g__mn_email_tl }
+            { \tl_if_empty_p:N \g__mn_course_tl }
+            { \tl_if_empty_p:N \g__mn_instructor_tl }
+            { \tl_if_empty_p:N \g__mn_institution_tl }
+            { \tl_if_empty_p:N \g__mn_semester_tl }
+          }
+          { \prg_return_false: }
+          { \prg_return_true: }
       }
       { \prg_return_false: }
-      { \prg_return_true: }
   }
 
 \cs_set:Npn \mn__make_thanks_text
