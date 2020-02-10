@@ -35,33 +35,6 @@
 
 \RequirePackage{mathnotes-messages}
 
-\bool_if:NT \g__mn_kindle_bool
-  {
-    \@ifclassloaded { memoir }
-      {
-        \pagestyle { empty }
-
-        \setstocksize{12.2cm}{9cm}
-        \settrimmedsize{12.2cm}{9cm}{*}
-        \settypeblocksize{12.2cm}{9cm}{*}
-
-        \setlrmargins{0cm}{*}{*}
-        \setulmargins{0cm}{*}{*}
-
-        \setlength{\headheight}{0cm}
-        \setlength{\headsep}{0cm}
-        \setlength{\footskip}{0cm}
-
-        \checkandfixthelayout
-      }
-      {
-          \msg_error:nnx
-            { mathnotes }
-            { requires memoir class }
-            { kindle }
-      }
-  }
-
 % Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.
 \bool_new:N  \c__mn_fontspec_bool
@@ -470,6 +443,10 @@
     }
   }
 
+\skip_const:Nn \g__mn_maketitle_after_title { 1em }
+\skip_const:Nn \g__mn_maketitle_after_author { 0.5em }
+\skip_const:Nn \g__mn_maketitle_after { 1.5em }
+
 \RenewDocumentCommand \@maketitle {}
   {
     \begin{center}
@@ -485,7 +462,7 @@
           \par
           \group_end:
         }
-      \skip_vertical:n { 1em }
+      \skip_vertical:N \g__mn_maketitle_after_title
 
       % Set the author.
       \group_begin:
@@ -496,15 +473,15 @@
       \end{tabular}
       \par
       \group_end:
+      \skip_vertical:N \g__mn_maketitle_after_author
 
       % Set the date.
-      \skip_vertical:n { 0.5em }
       \large
       \@date
 
     \end{center}
     \par
-    \skip_vertical:n { 1.5em }
+    \skip_vertical:N \g__mn_maketitle_after
   }
 
 \RenewDocumentCommand \maketitle {}
@@ -553,6 +530,36 @@
     \group_end:
     \setcounter{footnote}{0}
     % NOTE: we don't erase the definitions of \@title, \thanks, etc.
+  }
+
+\bool_if:NT \g__mn_kindle_bool
+  {
+    \skip_gset:Nn \g__mn_maketitle_after_title { 0em }
+    \skip_gset:Nn \g__mn_maketitle_after_author { 0em }
+    \skip_gset:Nn \g__mn_maketitle_after { 0em }
+    \@ifclassloaded { memoir }
+      {
+        \pagestyle { empty }
+
+        \setstocksize{12.2cm}{9cm}
+        \settrimmedsize{12.2cm}{9cm}{*}
+        \settypeblocksize{12.2cm}{9cm}{*}
+
+        \setlrmargins{0cm}{*}{*}
+        \setulmargins{0cm}{*}{*}
+
+        \setlength{\headheight}{0cm}
+        \setlength{\headsep}{0cm}
+        \setlength{\footskip}{0cm}
+
+        \checkandfixthelayout
+      }
+      {
+          \msg_error:nnx
+            { mathnotes }
+            { requires memoir class }
+            { kindle }
+      }
   }
 
 \bool_if:NT \g__mn_xcolor_bool
