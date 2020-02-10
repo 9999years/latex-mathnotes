@@ -543,6 +543,10 @@
 
 \bool_if:NT \g__mn_kindle_bool
   {
+    \keys_set:nn { mn__main }
+      {
+        generate~thanks = false ,
+      }
     \skip_gset:Nn \g__mn_maketitle_after_title { 0em }
     \skip_gset:Nn \g__mn_maketitle_after_author { 0em }
     \skip_gset:Nn \g__mn_maketitle_after { 0em }
