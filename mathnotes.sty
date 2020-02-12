@@ -201,11 +201,14 @@
       { \DeclareMathOperator \id {id} }
 
     % Injective function.
-    \ProvideDocumentCommand \injective {}{\hookrightarrow}
+    \ProvideDocumentCommand \injection {}{\hookrightarrow}
     \ProvideDocumentCommand \inj {}{\hookrightarrow}
     % Surjective function.
-    \ProvideDocumentCommand \surjective {}{\twoheadrightarrow}
+    \ProvideDocumentCommand \surjection {}{\twoheadrightarrow}
     \ProvideDocumentCommand \surj {}{\twoheadrightarrow}
+    % Bijective function.
+    \ProvideDocumentCommand \bijective {}{\twoheadrightarrowtail}
+    \ProvideDocumentCommand \bij {}{\twoheadrightarrowtail}
     % Function restriction.
     \ProvideDocumentCommand \restr {}{\restriction}
 
@@ -847,7 +850,7 @@
     \bool_set_true:N \g__mn_knowledge_bool
   }
 
-\bool_if:NT \g__mn_knowledge_bool
+\bool_if:NTF \g__mn_knowledge_bool
   {
     \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
 
@@ -958,6 +961,18 @@
       {
         color = MNunknowncont ,
       }
+  }
+  {
+    % If we don't load the knowledge package, provide a *similar* interface
+    % to make writing commands that *optionally* use the knowledge interface
+    % easier.
+    \ProvideDocumentCommand \itemAP { O{} } { \item[#1] }
+    \ProvideDocumentCommand \AP { } { }
+    \ProvideDocumentCommand \phantomintro { d() m } { }
+    \ProvideDocumentCommand \nointro { m } { }
+    \ProvideDocumentCommand \reintro { s o m } { #3 }
+    \ProvideDocumentCommand \intro { d() o d() m } { #4 }
+    \ProvideDocumentCommand \kl { d() o d() m } { #4 }
   }
 
 \bool_if:NT \g__mn_index_bool

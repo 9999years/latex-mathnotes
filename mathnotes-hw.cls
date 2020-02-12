@@ -17,18 +17,19 @@
 \int_new:N \g__mn_problems_int
 \int_set_eq:NN \g__mn_problems_int \c_one_int
 
-\tl_new:N \g__mn_problem_string_tl
-\tl_set:Nn \g__mn_problem_string_tl { Problem }
+\tl_const:Nn \g__mn_problem_string_tl { Problem }
 
-\tl_new:N \g__mn_problem_after_tl
-\tl_set:Nn \g__mn_problem_after_tl { . }
+\tl_const:Nn \g__mn_problem_after_tl { . }
 
 \tl_new:N \mn__problem_number_tl
-\tl_set:Nn \mn__problem_number_tl
+\tl_set_eq:NN \mn__problem_number_tl \c_novalue_tl
+
+\tl_const:Nn \mn__problem_number_default_tl
   {
     \int_to_arabic:n { \g__mn_problems_int }
-    \int_gincr:N \g__mn_problems_int
   }
+
+\tl_new:N \mn__problem_number_current_tl
 
 \keys_define:nn { mn__main }
   {
@@ -40,6 +41,10 @@
   {
     number .value_required:n = true ,
     number .tl_set:N = \mn__problem_number_tl ,
+
+    title .value_required:n = true ,
+    title .tl_set:N = \mn__problem_title_tl ,
+    title .initial:n = ,
 
     label .value_required:n = true ,
     label .tl_set:N = \mn__problem_label_tl ,
@@ -54,7 +59,7 @@
         }
         {
           % Non-empty value; give an error.
-          \msg_error:nno
+          \msg_error:nnx
             { mathnotes }
             { no key in problem }
             { \tl_use:N \l_keys_key_tl }
@@ -65,13 +70,14 @@
   {
     % A string like "Problem" or "Exercise" or "Question"
     \tl_use:N \g__mn_problem_string_tl
-    % The problem number. I should probably have some sort of auto-incrementing
-    % number...?
-    \tl_if_empty:NF \mn__problem_number_tl
+    % The problem number.
+    \tl_if_empty:NF \mn__problem_number_current_tl
       {
-        % Literal space.
-        \
-        \tl_use:N \mn__problem_number_tl
+        \ \tl_use:N \mn__problem_number_current_tl
+      }
+    \tl_if_empty:NF \mn__problem_title_tl
+      {
+        :~\tl_use:N \mn__problem_title_tl
       }
     % The text after the problem, nominally a period (".").
     \tl_use:N \g__mn_problem_after_tl
@@ -83,6 +89,19 @@
   }
   {
     \keys_set:nn { mn__problem } { #1 }
+
+    % Set the problem number
+    \tl_set:Nn \mn__problem_number_current_tl { }
+    \tl_if_eq:NNTF \mn__problem_number_tl \c_novalue_tl
+      {
+        % No number given
+        \tl_set_eq:NN \mn__problem_number_current_tl \mn__problem_number_default_tl
+      }
+      {
+        % Some number given, *maybe* empty
+        \tl_set_eq:NN \mn__problem_number_current_tl \mn__problem_number_tl
+      }
+
     \begin{mdframed}
       [
         style = note ,
@@ -91,9 +110,9 @@
             \tl_if_empty:NF \mn__problem_label_tl
               {
                 \phantomsection
-                \cs_set:Npx \@currentlabel { \mn__problem_number_tl }
+                \cs_set:Npx \@currentlabel { \tl_use:N \mn__problem_number_current_tl }
                 \cs_set:Npx \@currentlabelname { \mn__problem_title: }
-                \exp_after:wN \label { \mn__problem_label_tl }
+                \exp_after:wN \label { \tl_use:N \mn__problem_label_tl }
               }
             \mn__problem_title:
           } ,
@@ -101,6 +120,11 @@
   }
   {
     \end{mdframed}
+    % If we didn't get a custom number, increment the counter.
+    \tl_if_eq:NNT \mn__problem_number_tl \c_novalue_tl
+      {
+        \int_gincr:N \g__mn_problems_int
+      }
   }
 
 \NewDocumentCommand \prob
