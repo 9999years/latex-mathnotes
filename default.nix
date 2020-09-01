@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> { }, }:
+{ pkgs ? import <nixpkgs> { } }:
 let
   inherit (pkgs) stdenv lib fetchzip fontconfig;
 
@@ -27,6 +27,7 @@ let
   versionSentinel = "\${VERSION}$";
   build = { pdf ? true, tar ? true, ... }:
     stdenv.mkDerivation rec {
+      inherit pkg;
       name = "latex-${pkg}";
       version = "2020/09/01 0.1.0";
 
@@ -79,11 +80,19 @@ let
         ''}
       '';
     };
-in {
+in rec {
   tar = build { };
   dir = build {
     pdf = false;
     tar = false;
   };
   dir-pdf = build { tar = false; };
+  texlive = {
+    pkgs = lib.singleton (dir.overrideAttrs (old: {
+      installPhase = old.installPhase + ''
+        mkdir -p $out/tex/latex/
+        mv $out/${old.pkg} $out/tex/latex/
+      '';
+    }));
+  };
 }
