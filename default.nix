@@ -25,11 +25,15 @@ let
 
   pkg = "mathnotes";
   versionSentinel = "\${VERSION}$";
+  dateSentinel = "\${DATE}$";
   build = { pdf ? true, tar ? true, ... }:
     stdenv.mkDerivation rec {
       inherit pkg;
       name = "latex-${pkg}";
-      version = "2020/09/01 0.1.0";
+      pname = "latex-${pkg}-${versionNumber}";
+      versionNumber = "0.1.1";
+      date = "2020/09/01";
+      version = "${date} ${versionNumber}";
 
       buildInputs = with pkgs;
         [
@@ -62,6 +66,7 @@ let
       buildPhase = let latexmk = "latexmk -pdf -r ./latexmkrc -pvc- -pv-";
       in ''
         sd --string-mode '${versionSentinel}' '${version}' *.tex *.sty
+        sd --string-mode '${dateSentinel}' '${date}' *.tex *.sty
         ${lib.optionalString pdf "${latexmk} *.tex"}
 
         rm -rf ${pkg}
@@ -89,6 +94,7 @@ in rec {
   dir-pdf = build { tar = false; };
   texlive = {
     pkgs = lib.singleton (dir.overrideAttrs (old: {
+      tlType = "run";
       installPhase = old.installPhase + ''
         mkdir -p $out/tex/latex/
         mv $out/${old.pkg} $out/tex/latex/
