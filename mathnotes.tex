@@ -1,0 +1,50 @@
+\documentclass{ltxguidex}
+
+\usepackage{fontspec}
+\errorcontextlines=10
+\usepackage{changelog}
+\usepackage{changepage}
+\newcommand{\mn}{\ctan{mathnotes}}
+
+\makeatletter
+\renewcommand{\SX@explpreset}{
+	language=[LaTeX]TeX,
+	numbers=none,
+}
+\makeatother
+
+\setmainfont{Charter}[
+  Path = /nix/store/8ylkcs5xw8b3glvgp5l66md6hvxdk098-charter-200512/share/fonts/opentype/,
+  Extension = .otf,
+  UprightFont = * Regular,
+  ItalicFont = * Italic,
+  BoldFont = * Bold,
+  BoldItalicFont = * Bold Italic,
+]
+\usepackage{FiraSans}
+\usepackage{FiraMono}
+\lstset{basewidth=0.6em}
+
+
+\NewDocumentEnvironment{ctandescription}{}
+	{\NewDocumentCommand{\pkg}{m}{\item[\ctan{##1}]}
+	\begin{description}}
+	{\end{description}}
+
+\author{Rebecca Turner\thanks{Brandeis University; \email{rbt@sent.as}}}
+\title{The \mn\ Package}
+\date{${VERSION}$}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+	Rebecca Turner's personal macros for typesetting mathematics notes.
+	Tragically undocumented and unstable (for now).
+\end{abstract}
+
+\begin{note}
+	Browse the sources, contribute, or complain at \\
+	\https{github.com/9999years/latex-mathnotes}
+\end{note}
+
+\end{document}
