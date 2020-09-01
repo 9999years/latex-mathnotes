@@ -65,7 +65,15 @@
         ]{unicode-math}
         \bool_if:NT \g__mn_stix_bool
           {
-            \setmainfont { STIX~Two~Text }
+            \setmainfont
+              [
+                UprightFont    = *-Regular ,
+                ItalicFont     = *-Italic ,
+                BoldFont       = *-Bold ,
+                BoldItalicFont = *-BoldItalic ,
+                Extension      = .otf ,
+              ]
+              { STIX2Text }
 
             \setmathfont
               [
@@ -74,8 +82,9 @@
                     1 , % better caligraphic forms
                     8 , % upright integrals
                   } ,
+                Extension = .otf ,
               ]
-              { STIX~Two~Math }
+              { STIX2Math }
           }
       }
       {

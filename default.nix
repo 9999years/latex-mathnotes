@@ -31,7 +31,7 @@ let
       inherit pkg;
       name = "latex-${pkg}";
       pname = "latex-${pkg}-${versionNumber}";
-      versionNumber = "0.1.1";
+      versionNumber = "0.1.2";
       date = "2020/09/01";
       version = "${date} ${versionNumber}";
 
@@ -65,8 +65,8 @@ let
       dontConfigure = true;
       buildPhase = let latexmk = "latexmk -pdf -r ./latexmkrc -pvc- -pv-";
       in ''
-        sd --string-mode '${versionSentinel}' '${version}' *.tex *.sty
-        sd --string-mode '${dateSentinel}' '${date}' *.tex *.sty
+        sd --string-mode '${versionSentinel}' '${version}' *.tex *.sty *.cls
+        sd --string-mode '${dateSentinel}' '${date}' *.tex *.sty *.cls
         ${lib.optionalString pdf "${latexmk} *.tex"}
 
         rm -rf ${pkg}
