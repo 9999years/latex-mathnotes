@@ -863,19 +863,8 @@
   {
     \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
 
-    % Add our patch to disable the redefined \label command.
+    % Disable the redefined \label command; this fixes some documents.
     \KnowledgeConfigureBooleanOption[\knowledge_configuration_label_autoscope_bool]{patch~label}
-
-    \RenewDocumentCommand\scopeLabel{m}{
-        \kl_hide_begin:
-          \bool_if:NTF
-            \knowledge_configuration_label_autoscope_bool
-            \knowledge_knowledgescope_one:n
-            \use_none:n
-            {#1}
-        \kl_hide_end:
-        \cs_if_exist:NTF\LaTeXlabel\LaTeXlabel\use_none:n{#1}
-    }
 
     % Patch in the automatic-AP feature:
     \bool_new:N \g__mn_noAP_bool
