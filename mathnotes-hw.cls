@@ -212,3 +212,6 @@
 \headstyles { mathnotes-hw }
 
 \setlength{\columnsep}{3em}
+
+% No chapter numbers for figures.
+\counterwithout{figure}{chapter}
