@@ -279,3 +279,9 @@
 
 % No chapter numbers for figures.
 \counterwithout{figure}{chapter}
+
+% Put author name, title in headings
+\makeevenfoot { headings } { } { } { }
+\makeoddfoot  { headings } { } { } { }
+\makeevenhead { headings } { } { } { \thepage }
+\makeoddhead  { headings } { \@author,~\textit{ \@title } } { } { \thepage }

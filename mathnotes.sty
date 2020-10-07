@@ -550,7 +550,8 @@
       \@thanks
     \group_end:
     \setcounter{footnote}{0}
-    % NOTE: we don't erase the definitions of \@title, \thanks, etc.
+    \cs_set:Npn \thanks ##1 { }
+    % NOTE: we don't erase the definitions of \@title, etc.
   }
 
 \bool_if:NT \g__mn_kindle_bool
