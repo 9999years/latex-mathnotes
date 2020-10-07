@@ -36,7 +36,7 @@ let
       inherit pkg;
       name = "latex-${pkg}";
       pname = "latex-${pkg}-${versionNumber}";
-      versionNumber = "0.2.0";
+      versionNumber = "0.2.1";
       date = "2020/10/07";
       version = "${date} ${versionNumber}";
 
@@ -95,7 +95,12 @@ let
   };
   dir-pdf = build { tar = false; };
 
-  mathnotes-texlive-deps = {
+  # Copied from nixpkgs.
+  combinePkgs = pkgSet:
+    lib.concatLists # uniqueness is handled in `texlive.combine`
+    (lib.mapAttrsToList (_n: a: a.pkgs) pkgSet);
+
+  mathnotes-texlive-deps = combinePkgs {
     inherit (texlive)
     # article.cls: needed by ./mathnotes-formula-sheet.cls
       latex
@@ -162,15 +167,13 @@ let
 in {
   inherit tar dir dir-pdf;
   texlive = {
-    pkgs = [
-      (dir.overrideAttrs (old: {
-        tlType = "run";
-        installPhase = old.installPhase + ''
-          mkdir -p $out/tex/latex/
-          mv $out/${old.pkg} $out/tex/latex/
-        '';
-      }))
-    ] ++ (lib.attrValues mathnotes-texlive-deps);
+    pkgs = lib.singleton ((dir.overrideAttrs (old: {
+      tlType = "run";
+      installPhase = old.installPhase + ''
+        mkdir -p $out/tex/latex/
+        mv $out/${old.pkg} $out/tex/latex/
+      '';
+    }))) ++ mathnotes-texlive-deps;
   };
   mathnotes-transitive = stdenv.mkDerivation {
     pname = "mathnotes";
@@ -181,7 +184,8 @@ in {
         inherit (texlive)
           collection-latex # Stuff i don't want to deal with.
           latexmk;
-      } // mathnotes-texlive-deps))
+        mathnotes-deps = mathnotes-texlive-deps;
+      }))
     ];
   };
 }
