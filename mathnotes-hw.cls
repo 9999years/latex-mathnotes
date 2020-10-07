@@ -14,13 +14,52 @@
 
 \LoadClass{mathnotes}
 
+\cs_set:Npn \mn__undefine_thm:n #1
+  {
+    \cs_undefine:c { #1 }
+    \cs_undefine:c { end#1 }
+    \cs_undefine:c { #1* }
+    \cs_undefine:c { end#1* }
+  }
+
+\mn__undefine_thm:n { thm }
+\mn__undefine_thm:n { lem }
+\mn__undefine_thm:n { cor }
+\mn__undefine_thm:n { prop }
+\mn__undefine_thm:n { defn }
+\mn__undefine_thm:n { notation }
+\mn__undefine_thm:n { ex }
+
+\cs_undefine:N \mn__undefine_thm
+
+\theoremstyle { definition }
+\newtheorem { thm } { Theorem }
+\newtheorem { lem } { Lemma }
+\newtheorem { cor } { Corollary }
+\newtheorem { prop } { Proposition }
+\newtheorem { defn } { Definition }
+\newtheorem { notation } { Notation }
+\newtheorem { ex } { Example }
+
+% The displayed problem number. \g__mn_problems_int isn't incremented if a
+% custom number is given.
 \int_new:N \g__mn_problems_int
 \int_set_eq:NN \g__mn_problems_int \c_one_int
 
+% The internal problem number. \g__mn_all_problems_int is *always*
+% incremented, so it can be used as a unique identifier in hyperref
+% pdf bookmark names.
+\int_new:N \g__mn_all_problems_int
+\int_set_eq:NN \g__mn_all_problems_int \c_one_int
+
+% Label prepended to problem numbers.
 \tl_const:Nn \g__mn_problem_string_tl { Problem }
 
+% Label appended to problem numbers; omitted from PDF bookmarks.
 \tl_const:Nn \g__mn_problem_after_tl { . }
 
+% A possible custom problem number. If \c_novalue_tl, use
+% \g__mn_problems_int instead.
 \tl_new:N \mn__problem_number_tl
 \tl_set_eq:NN \mn__problem_number_tl \c_novalue_tl
 
@@ -29,7 +68,13 @@
     \int_to_arabic:n { \g__mn_problems_int }
   }
 
+% Current problem number, either from \g__mn_problems_int or
+% \mn__problem_number_tl.
 \tl_new:N \mn__problem_number_current_tl
+
+% Current problem display title, including "problem" label, number, and
+% custom title.
+% \tl_new:N \mn__problem_display_title_tl
 
 \keys_define:nn { mn__main }
   {
@@ -66,7 +111,7 @@
         } ,
   }
 
-\cs_set:Npn \mn__problem_title:
+\cs_set:Npn \mn__problem_title_pdf:
   {
     % A string like "Problem" or "Exercise" or "Question"
     \tl_use:N \g__mn_problem_string_tl
@@ -79,8 +124,19 @@
       {
         :~\tl_use:N \mn__problem_title_tl
       }
+  }
+
+\cs_set:Npn \mn__problem_title:
+  {
+    \mn__problem_title_pdf:
     % The text after the problem, nominally a period (".").
     \tl_use:N \g__mn_problem_after_tl
+  }
+
+% PDF anchor / bookmark name for hyperref.
+\cs_set:Npn \mn__problem_anchor:
+  {
+    problem.\int_to_arabic:n { \g__mn_all_problems_int }
   }
 
 \NewDocumentEnvironment { problem }
@@ -102,20 +158,26 @@
         \tl_set_eq:NN \mn__problem_number_current_tl \mn__problem_number_tl
       }
 
+    \phantomsection
+    \addcontentsline
+      { toc }
+      { chapter }
+      { \mn__problem_title_pdf: }
     \begin{mdframed}
       [
         style = note ,
-        startinnercode = \mn__note_title:n
-          {
-            \tl_if_empty:NF \mn__problem_label_tl
-              {
-                \phantomsection
-                \cs_set:Npx \@currentlabel { \tl_use:N \mn__problem_number_current_tl }
-                \cs_set:Npx \@currentlabelname { \mn__problem_title: }
-                \exp_after:wN \label { \tl_use:N \mn__problem_label_tl }
-              }
-            \mn__problem_title:
-          } ,
+        startinnercode =
+          \mn__note_title:n
+            {
+              \tl_if_empty:NF \mn__problem_label_tl
+                {
+                  \cs_set:Npx \@currentlabel { \tl_use:N \mn__problem_number_current_tl }
+                  \cs_set:Npx \@currentlabelname { \mn__problem_title: }
+                  \exp_after:wN \label { \tl_use:N \mn__problem_label_tl }
+                }
+              \mn__problem_title:
+            }
+          ,
       ]
   }
   {
@@ -125,6 +187,8 @@
       {
         \int_gincr:N \g__mn_problems_int
       }
+    % But always increment the internal counter.
+    \int_gincr:N \g__mn_all_problems_int
   }
 
 \NewDocumentCommand \prob

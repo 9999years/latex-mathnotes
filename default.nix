@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> { } }:
 let
-  inherit (pkgs) stdenv lib fetchzip fontconfig;
+  inherit (pkgs) stdenv lib fetchzip texlive sd;
 
   charter = stdenv.mkDerivation rec {
     pname = "charter";
@@ -15,13 +15,18 @@ let
     dontConfigure = true;
     dontBuild = true;
     installPhase = ''
-      mkdir -p $out/share/fonts
-      mv "Charter/OpenType" $out/share/fonts/opentype
-      mv "Charter/OpenType TT" $out/share/fonts/truetype
-      mv "Charter/WOFF" $out/share/fonts/woff
-      mv "Charter license.txt" $out/LICENSE.txt
+      mkdir -p $out/fonts/opentype/public
+      mv "Charter/OpenType" $out/fonts/opentype/public/charter
+      mv "Charter license.txt" $out/fonts/opentype/public/charter/LICENSE.txt
+      # mv "Charter/OpenType TT" $out/share/fonts/truetype
+      # mv "Charter/WOFF" $out/share/fonts/woff
     '';
+
+    # needed for texlive...
+    tlType = "run";
   };
+
+  charter-texlive = { pkgs = lib.singleton charter; };
 
   pkg = "mathnotes";
   versionSentinel = "\${VERSION}$";
@@ -31,22 +36,20 @@ let
       inherit pkg;
       name = "latex-${pkg}";
       pname = "latex-${pkg}-${versionNumber}";
-      versionNumber = "0.1.4";
-      date = "2020/09/23";
+      versionNumber = "0.2.0";
+      date = "2020/10/07";
       version = "${date} ${versionNumber}";
 
-      buildInputs = with pkgs;
-        [
-          (texlive.combine rec {
-            inherit (texlive)
-              scheme-small collection-xetex latexmk collection-latexrecommended
-              ltxguidex translations framed enumitem showexpl babel babel-german
-              babel-english changepage fira varwidth;
-          })
-          fd
-          sd
-          just
-        ] ++ [ charter ];
+      buildInputs = [
+        (texlive.combine rec {
+          inherit (texlive)
+            scheme-small collection-xetex latexmk collection-latexrecommended
+            ltxguidex translations framed enumitem showexpl babel babel-german
+            babel-english changepage fira varwidth;
+          charter = charter-texlive;
+        })
+        sd
+      ];
 
       src = ./.;
       distSrcs = [
@@ -85,20 +88,100 @@ let
         ''}
       '';
     };
-in rec {
   tar = build { };
   dir = build {
     pdf = false;
     tar = false;
   };
   dir-pdf = build { tar = false; };
+
+  mathnotes-texlive-deps = {
+    inherit (texlive)
+    # article.cls: needed by ./mathnotes-formula-sheet.cls
+      latex
+
+      # multicol.sty: needed by ./mathnotes-formula-sheet.cls
+      # longtable.sty: needed by ./mathnotes.sty
+      tools
+
+      # xparse.sty: needed by:
+      #     - ./mathnotes.cls
+      #     - ./mathnotes.sty
+      l3packages
+
+      # expl3.sty: needed by:
+      #     - ./mathnotes-formula-sheet.cls
+      #     - ./mathnotes-hw.cls
+      #     - ./mathnotes.cls
+      #     - ./mathnotes.sty
+      #     - ./mathnotes-util.sty
+      #     - ./mathnotes-messages.sty
+      l3kernel
+
+      geometry # geometry.sty: needed by ./mathnotes-formula-sheet.cls
+
+      #   needed by:
+      #     - ./mathnotes-formula-sheet.cls
+      #     - ./mathnotes.sty
+      enumitem # enumitem.sty
+
+      #   needed by:
+      #     - ./mathnotes-formula-sheet.cls
+      #     - ./mathnotes.sty
+      kvoptions # kvoptions.sty
+
+      memoir # memoir.cls: needed by ./mathnotes.cls
+      etoolbox # etoolbox.sty: needed by ./mathnotes.cls and ./mathnotes.sty
+
+      # Needed by mathnotes.sty:
+      xkeyval # xkeyval.sty
+      mathtools # mathtools.sty
+      amsmath # amsmath.sty
+      unicode-math # unicode-math.sty
+      stix2-otf # Needed when using xelatex (optional, default)
+      # stix2-type1 # Needed when using pdflatex (optional, default)
+      ntheorem # ntheorem.sty
+      listings # listings.sty: Needed with 'listings' option (optional, non-default)
+      xcolor # needed by ./mathnotes.sty (optional, default)
+      mdframed # mdframed.sty
+      zref # zref-abspage.sty: needed by mdframed.sty
+      hyperref # hyperref.sty
+      knowledge # knowledge.sty
+      currfile # currfile.sty: needed by knowledge.sty
+      filehook # filehook.sty: needed by currfile.sty
+      # needspace
+      tabu # tabu.sty: optional, non-default
+      booktabs # booktabs.sty
+      multirow # multirow.sty
+      graphics # graphicx.sty (optional, non-default)
+      caption # caption.sty (optional, non-default)
+      footmisc # footmisc.sty (optional, non-default)
+    ;
+  };
+
+in {
+  inherit tar dir dir-pdf;
   texlive = {
-    pkgs = lib.singleton (dir.overrideAttrs (old: {
-      tlType = "run";
-      installPhase = old.installPhase + ''
-        mkdir -p $out/tex/latex/
-        mv $out/${old.pkg} $out/tex/latex/
-      '';
-    }));
+    pkgs = [
+      (dir.overrideAttrs (old: {
+        tlType = "run";
+        installPhase = old.installPhase + ''
+          mkdir -p $out/tex/latex/
+          mv $out/${old.pkg} $out/tex/latex/
+        '';
+      }))
+    ] ++ (lib.attrValues mathnotes-texlive-deps);
+  };
+  mathnotes-transitive = stdenv.mkDerivation {
+    pname = "mathnotes";
+    version = "0.0.0";
+    src = ./.;
+    buildInputs = [
+      (texlive.combine ({
+        inherit (texlive)
+          collection-latex # Stuff i don't want to deal with.
+          latexmk;
+      } // mathnotes-texlive-deps))
+    ];
   };
 }
