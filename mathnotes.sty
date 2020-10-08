@@ -862,7 +862,20 @@
 
 \bool_if:NTF \g__mn_knowledge_bool
   {
-    \RequirePackage[quotation, xcolor, notion, makeidx]{knowledge}
+    \bool_if:NT \g__mn_xcolor_bool
+      {
+        \PassOptionsToPackage{xcolor}{knowledge}
+        \providecolorset { HTML }
+          % Prefix/postfix of all color names
+          { } { }
+          {
+            \use_none:n
+            ; MNunknown     , DE0B0F
+            ; MNunknowncont , AD483E
+            ; MNintro       , 051338
+          }
+      }
+    \RequirePackage[quotation, notion, makeidx]{knowledge}
 
     % Disable the redefined \label command; this fixes some documents.
     \KnowledgeConfigureBooleanOption[\knowledge_configuration_label_autoscope_bool]{patch~label}
@@ -915,16 +928,6 @@
     \apptocmd { \description } { \mn__use_itemAP: } { } { }
 
     % Make some better styles.
-    \providecolorset { HTML }
-      % Prefix/postfix of all color names
-      { } { }
-      {
-        \use_none:n
-        ; MNunknown     , DE0B0F
-        ; MNunknowncont , AD483E
-        ; MNintro       , 051338
-      }
-
     \knowledgeconfigure
       {
         visible~anchor~points = false
@@ -938,27 +941,51 @@
     % notion, intro notion
     % intro, intro unknown, intro unknown cont
     % kl unknown, kl unknown cont
-    \mn__knowledgestyles:nn
-      { notion , intro~notion }
+    \bool_if:NTF \g__mn_xcolor_bool
       {
-        color = MNlink ,
+        \mn__knowledgestyles:nn
+          { notion , intro~notion }
+          {
+            color = MNlink ,
+          }
+        \mn__knowledgestyles:nn
+          { intro , intro~notion , intro~unknown, intro~unknown~cont , }
+          {
+            boldface ,
+            color = MNintro ,
+          }
+        \mn__knowledgestyles:nn
+          { intro~unknown , intro~unknown~cont , kl~unknown , kl~unknown~cont , }
+          {
+            underline = false ,
+            color     = MNunknown ,
+          }
+        \mn__knowledgestyles:nn
+          { intro~unknown~cont , kl~unknown~cont , }
+          {
+            color = MNunknowncont ,
+          }
       }
-    \mn__knowledgestyles:nn
-      { intro , intro~notion , intro~unknown, intro~unknown~cont , }
       {
-        boldface ,
-        color = MNintro ,
-      }
-    \mn__knowledgestyles:nn
-      { intro~unknown , intro~unknown~cont , kl~unknown , kl~unknown~cont , }
-      {
-        underline = false ,
-        color     = MNunknown ,
-      }
-    \mn__knowledgestyles:nn
-      { intro~unknown~cont , kl~unknown~cont , }
-      {
-        color = MNunknowncont ,
+        % These blank definitions are important for erasing some very poorly
+        % typeset decisions.
+        \mn__knowledgestyles:nn
+          { notion , intro~notion }
+          {
+          }
+        \mn__knowledgestyles:nn
+          { intro , intro~notion , intro~unknown, intro~unknown~cont , }
+          {
+            boldface ,
+          }
+        \mn__knowledgestyles:nn
+          { intro~unknown , intro~unknown~cont , kl~unknown , kl~unknown~cont , }
+          {
+          }
+        \mn__knowledgestyles:nn
+          { intro~unknown~cont , kl~unknown~cont , }
+          {
+          }
       }
   }
   {

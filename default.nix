@@ -36,7 +36,7 @@ let
       inherit pkg;
       name = "latex-${pkg}";
       pname = "latex-${pkg}-${versionNumber}";
-      versionNumber = "0.2.3";
+      versionNumber = "0.2.4";
       date = "2020/10/07";
       version = "${date} ${versionNumber}";
 
@@ -184,7 +184,7 @@ in {
         inherit (texlive)
           collection-latex # Stuff i don't want to deal with.
           latexmk;
-        mathnotes-deps = mathnotes-texlive-deps;
+        mathnotes-deps = { pkgs = mathnotes-texlive-deps; };
       }))
     ];
   };
