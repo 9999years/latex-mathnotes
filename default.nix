@@ -36,7 +36,7 @@ let
       inherit pkg;
       name = "latex-${pkg}";
       pname = "latex-${pkg}-${versionNumber}";
-      versionNumber = "0.2.2";
+      versionNumber = "0.2.3";
       date = "2020/10/07";
       version = "${date} ${versionNumber}";
 

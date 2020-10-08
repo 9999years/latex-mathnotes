@@ -3,7 +3,7 @@
 \ProvidesExplClass{mathnotes-hw}{${DATE}$}{${VERSION}$}{Companion styles
   to mathnotes for typeset homework assignments.}
 
-\PassOptionsToPackage{noxcolor}{mathnotes}
+% \PassOptionsToPackage{noxcolor}{mathnotes}
 
 \RequirePackage{kvoptions}
 \DeclareDefaultOption
