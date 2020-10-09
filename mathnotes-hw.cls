@@ -169,10 +169,10 @@
         startinnercode =
           \mn__note_title:n
             {
+              \cs_set:Npx \@currentlabel { \tl_use:N \mn__problem_number_current_tl }
+              \cs_set:Npx \@currentlabelname { \mn__problem_title: }
               \tl_if_empty:NF \mn__problem_label_tl
                 {
-                  \cs_set:Npx \@currentlabel { \tl_use:N \mn__problem_number_current_tl }
-                  \cs_set:Npx \@currentlabelname { \mn__problem_title: }
                   \exp_after:wN \label { \tl_use:N \mn__problem_label_tl }
                 }
               \mn__problem_title:

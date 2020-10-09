@@ -1,5 +1,9 @@
 { pkgs ? import <nixpkgs> { } }:
 let
+  # mathnotes version number and version date
+  versionNumber = "0.2.5";
+  date = "2020/10/09";
+
   inherit (pkgs) stdenv lib fetchzip texlive sd;
 
   charter = stdenv.mkDerivation rec {
@@ -33,11 +37,9 @@ let
   dateSentinel = "\${DATE}$";
   build = { pdf ? true, tar ? true, ... }:
     stdenv.mkDerivation rec {
-      inherit pkg;
+      inherit pkg versionNumber date;
       name = "latex-${pkg}";
       pname = "latex-${pkg}-${versionNumber}";
-      versionNumber = "0.2.4";
-      date = "2020/10/07";
       version = "${date} ${versionNumber}";
 
       buildInputs = [
