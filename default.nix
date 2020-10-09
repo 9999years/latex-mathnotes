@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> { } }:
 let
   # mathnotes version number and version date
-  versionNumber = "0.2.5";
+  versionNumber = "0.2.6";
   date = "2020/10/09";
 
   inherit (pkgs) stdenv lib fetchzip texlive sd;
