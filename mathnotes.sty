@@ -252,10 +252,38 @@
 \bool_if:NT \g__mn_listings_bool
   { \RequirePackage{listings} }
 
+\bool_if:NT \g__mn_xcolor_bool
+  {
+    \PassOptionsToPackage { rgb } { xcolor }
+    \RequirePackage { xcolor }
+    \providecolorset { HTML }
+      % Prefix/postfix of all color names
+      { } { }
+      {
+        \use_none:n
+        ; MNthmtitle  , 0F0066
+        ; MNthmbg     , EBFEFF
+        ; MNthmline   , 4836B3
+        ; MNextitle   , 692219
+        ; MNexbg      , FFF0EB
+        ; MNexline    , CC7468
+        ; MNdefntitle , 00540B
+        ; MNdefnline  , 196924
+        ; MNdefnbg    , EBFFED
+        ; MNnotetitle , 6B0019
+        ; MNnoteline  , CC3F60
+        ; MNnotebg    , FFF5F7
+
+        ; MNsecnum , 8015A1
+
+        ; MNlink , 113DB8
+      }
+  }
+
 % If listings is loaded, make them colorful:
 \mn__if_package_loaded:nT { listings }
   {
-    \RequirePackage{xcolor}
+    \RequirePackage { xcolor }
     \lstset
       {
         % Use a monospace font for code listings.
@@ -585,33 +613,6 @@
             { mathnotes }
             { requires memoir class }
             { kindle }
-      }
-  }
-
-\bool_if:NT \g__mn_xcolor_bool
-  {
-    \RequirePackage[rgb]{xcolor}
-    \providecolorset { HTML }
-      % Prefix/postfix of all color names
-      { } { }
-      {
-        \use_none:n
-        ; MNthmtitle  , 0F0066
-        ; MNthmbg     , EBFEFF
-        ; MNthmline   , 4836B3
-        ; MNextitle   , 692219
-        ; MNexbg      , FFF0EB
-        ; MNexline    , CC7468
-        ; MNdefntitle , 00540B
-        ; MNdefnline  , 196924
-        ; MNdefnbg    , EBFFED
-        ; MNnotetitle , 6B0019
-        ; MNnoteline  , CC3F60
-        ; MNnotebg    , FFF5F7
-
-        ; MNsecnum , 8015A1
-
-        ; MNlink , 113DB8
       }
   }
 
