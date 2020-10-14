@@ -9,6 +9,7 @@
 \RequirePackage{xparse}  % Better command declarations.
 % \RequirePackage{etoolbox}  % Robust command declarations.
 \RequirePackage{xkeyval}  % Better keyval parsing.
+% {{{ Package options
 \RequirePackage{kvoptions}  % More flexible package options.
 \RequirePackage{mathnotes-util}
 
@@ -23,6 +24,8 @@
 \mn__option_new[init = true]{maketitle}
 \mn__option_new[init = true]{titles}
 \mn__option_new[init = true]{xcolor}
+\mn__option_new[init = true]{theorems}
+\mn__option_new[init = true]{enumitem}
 \mn__option_new{listings}
 \mn__option_new{knowledge}
 \mn__option_new{index}
@@ -31,11 +34,11 @@
 \mn__option_new{tabu}
 \mn__option_new{kindle}
 
-\mn__process_options:n { mn__package_options }
+\mn__process_options:n { mn__package_options } % }}}
 
 \RequirePackage{mathnotes-messages}
 
-% Load fonts.
+% {{{ Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.
 \bool_new:N  \c__mn_fontspec_bool
 \bool_set:Nn \c__mn_fontspec_bool
@@ -96,11 +99,11 @@
   {
     % No fonts
     \RequirePackage{amsmath}[2013/01/14]
-  }
+  } % }}}
 
 \RequirePackage[thmmarks, amsmath, amsthm]{ntheorem}
 
-\bool_if:NT \g__mn_symbols_bool
+\bool_if:NT \g__mn_symbols_bool % {{{ Define math symbol commands
   {
     % Logical not
     \mn__if_package_loaded:nTF { unicode-math }
@@ -230,29 +233,30 @@
       { \DeclareMathOperator \curl {curl} }
     \cs_if_free:NT \dive
       { \DeclareMathOperator \dive {div} }
-  }
+  } % }}}
 
-% Gives this an equation in an amsmath starred environment.
-\ProvideDocumentCommand \numberthis {}
+% Gives this an equation a number in an amsmath starred environment.
+\ProvideDocumentCommand \numberthis { } % {{{
   {
     \tag { \theequation }
     \refstepcounter { equation }
-  }
+  } % }}}
 
 % Gives this equation a number and label in an amsmath starred environment.
-\ProvideDocumentCommand \labelthis { m }
+\ProvideDocumentCommand \labelthis { m } % {{{
   {
     \numberthis
     \IfValueT { #1 }
       { \label { #1 } }
-  }
+  } % }}}
 
-\RequirePackage{enumitem}
+\bool_if:NT \g__mn_enumitem_bool
+  { \RequirePackage{enumitem} }
 
 \bool_if:NT \g__mn_listings_bool
   { \RequirePackage{listings} }
 
-\bool_if:NT \g__mn_xcolor_bool
+\bool_if:NT \g__mn_xcolor_bool % {{{ Load xcolor and define MN colors
   {
     \PassOptionsToPackage { rgb } { xcolor }
     \RequirePackage { xcolor }
@@ -278,10 +282,9 @@
 
         ; MNlink , 113DB8
       }
-  }
+  } % }}}
 
-% If listings is loaded, make them colorful:
-\mn__if_package_loaded:nT { listings }
+\mn__if_package_loaded:nT { listings } % {{{ Better default styles
   {
     \RequirePackage { xcolor }
     \lstset
@@ -304,12 +307,12 @@
         breaklines ,
         breakatwhitespace = true ,
       }
-  }
+  } % }}}
 
 % Creates an acronym-command.
 % \newacronym[<\command>]{<text>} defines \command to be \textsc{text}.
 % \newacronym{<text>} defines \text to be \textsc{text}.
-\ProvideDocumentCommand \newacronym { o m }
+\ProvideDocumentCommand \newacronym { o m } % {{{
   {
     \group_begin:
       % If we have #1, then #1 is the cs we're going to define; #1 is a cs.
@@ -332,14 +335,14 @@
       \cs_new:cpn { \mn__acronym_cs: }
         { \textsc { #2 } }
     \group_end:
-  }
+  } % }}}
 
 % \newacronyms takes a comma-separated list as its argument and defines them
 % all as acronyms.
 \ProvideDocumentCommand \newacronyms { m }
   { \clist_map_function:nN { #1 } \newacronym }
 
-% Package configuration string values.
+% {{{ Package configuration string values; \mathnotes command
 \keys_define:nn { mn__main }
   {
     date   .value_required:n = true ,
@@ -376,7 +379,9 @@
   {
     \keys_set:nn { mn__main } { #1 }
   }
+% }}}
 
+% {{{ \author, \title, \maketitle, \thanks, etc.
 \bool_new:N \g__mn_author_set
 \cs_set:Npn \author #1
   {
@@ -391,7 +396,7 @@
     \cs_gset:Npn \@title { #1 }
   }
 
-\prg_new_conditional:Npnn \mn__if_should_make_thanks:
+\prg_new_conditional:Npnn \mn__if_should_make_thanks: % {{{
   { T, }
   {
     \bool_if:NTF \g__mn_should_make_thanks
@@ -408,9 +413,9 @@
           { \prg_return_true: }
       }
       { \prg_return_false: }
-  }
+  } % }}}
 
-\cs_set:Npn \mn__make_thanks_text
+\cs_set:Npn \mn__make_thanks_text % {{{
   {
     \tl_if_empty:NF \g__mn_email_tl
       {
@@ -471,27 +476,28 @@
         \tl_use:N \g__mn_semester_tl
       }
     .
-  }
+  } % }}}
 
-\cs_set:Npn \@author
+\cs_set:Npn \@author % {{{
   {
-  % If the author hasn't been set, we provide this (complicated, PITA)
-  % default; however, if we don't have any information to put in it, we
-  % still give a warning.
-  \tl_if_eq:NNTF \g__mn_name_tl \c_novalue_tl
-    {
-      \msg_warning:nn { mathnotes } { no name }
-    }
-    {
-      \tl_use:N \g__mn_name_tl
-      % Do we have any information to put in a \thanks?
-      \mn__if_should_make_thanks:T
-        {
-          \thanks { \mn__make_thanks_text }
-        }
-    }
-  }
+    % If the author hasn't been set, we provide this (complicated, PITA)
+    % default; however, if we don't have any information to put in it, we
+    % still give a warning.
+    \tl_if_eq:NNTF \g__mn_name_tl \c_novalue_tl
+      {
+        \msg_warning:nn { mathnotes } { no name }
+      }
+      {
+        \tl_use:N \g__mn_name_tl
+        % Do we have any information to put in a \thanks?
+        \mn__if_should_make_thanks:T
+          {
+            \thanks { \mn__make_thanks_text }
+          }
+      }
+  } % }}}
 
+% {{{ \@maketitle and \maketitle
 \skip_const:Nn \g__mn_maketitle_after_title { 1em }
 \skip_const:Nn \g__mn_maketitle_after_author { 0.5em }
 \skip_const:Nn \g__mn_maketitle_after { 1.5em }
@@ -581,8 +587,10 @@
     \cs_set:Npn \thanks ##1 { }
     % NOTE: we don't erase the definitions of \@title, etc.
   }
+% }}} \@maketitle and \maketitle
+% }}}
 
-\bool_if:NT \g__mn_kindle_bool
+\bool_if:NT \g__mn_kindle_bool % {{{
   {
     \keys_set:nn { mn__main }
       {
@@ -614,10 +622,10 @@
             { requires memoir class }
             { kindle }
       }
-  }
+  } % }}}
 
-% To be prefaced with \exp:w
-\cs_set:Npn \mn__color:n #1
+% e.g. `\exp:w \mn__color:n { MNnotetitle }`
+\cs_set:Npn \mn__color:n #1 % {{{
   {
     \bool_if:NTF \g__mn_xcolor_bool
       {
@@ -627,189 +635,183 @@
       {
         \exp_end:
       }
-  }
+  } % }}}
 
-\cs_set:Npn \mn__color:nn #1#2
+\bool_if:NT \g__mn_theorems_bool % {{{ mdtheorem setup
   {
+    \RequirePackage{mdframed}
+
+    \mdfdefinestyle { theorem }
+      {
+        linewidth = 1.5pt ,
+      }
+
     \bool_if:NT \g__mn_xcolor_bool
       {
-        \exp_end:
-        \color[#1]{#2}
+        \mdfapptodefinestyle { theorem }
+          {
+            frametitlefont = \normalfont\bfseries\color{MNthmtitle} ,
+            linecolor = MNthmline ,
+            backgroundcolor = MNthmbg ,
+          }
       }
-  }
 
-\RequirePackage{mdframed}
-
-\mdfdefinestyle { theorem }
-  {
-    linewidth = 1.5pt ,
-  }
-
-\bool_if:NT \g__mn_xcolor_bool
-  {
-    \mdfapptodefinestyle { theorem }
+    \mdfdefinestyle { minor-theorem }
       {
-        frametitlefont = \normalfont\bfseries\color{MNthmtitle} ,
-        linecolor = MNthmline ,
-        backgroundcolor = MNthmbg ,
+        style = theorem ,
+        linewidth = 0.75pt ,
       }
-  }
 
-\mdfdefinestyle { minor-theorem }
-  {
-    style = theorem ,
-    linewidth = 0.75pt ,
-  }
-
-\mdfdefinestyle { example }
-  {
-    theoremtitlefont = \normalfont ,
-  }
-
-\bool_if:NT \g__mn_xcolor_bool
-  {
-    \mdfapptodefinestyle { example }
+    \mdfdefinestyle { example }
       {
-        frametitlefont = \normalfont\bfseries\color{MNextitle} ,
-        linecolor = MNexline ,
-        backgroundcolor = MNexbg ,
+        theoremtitlefont = \normalfont ,
       }
-  }
 
-\mdfdefinestyle { definition }
-  {
-  }
-
-\bool_if:NT \g__mn_xcolor_bool
-  {
-    \mdfapptodefinestyle { definition }
+    \bool_if:NT \g__mn_xcolor_bool
       {
-        frametitlefont = \normalfont\bfseries\color{MNdefntitle} ,
-        linecolor = MNdefnline ,
-        backgroundcolor = MNdefnbg ,
+        \mdfapptodefinestyle { example }
+          {
+            frametitlefont = \normalfont\bfseries\color{MNextitle} ,
+            linecolor = MNexline ,
+            backgroundcolor = MNexbg ,
+          }
       }
-  }
 
-\mdfdefinestyle { note }
-  {
-    topline = false ,
-    rightline = false ,
-    bottomline = false ,
-    linewidth = 2pt ,
-  }
-
-\bool_if:NT \g__mn_xcolor_bool
-  {
-    \mdfapptodefinestyle { note }
+    \mdfdefinestyle { definition }
       {
-        frametitlefont = \normalfont\bfseries\color{MNnotetitle} ,
-        linecolor = MNnoteline ,
-        backgroundcolor = MNnotebg ,
       }
-  }
 
-\mdfdefinestyle { example }
-  {
-    theoremtitlefont = \normalfont ,
-  }
-
-\bool_if:NT \g__mn_xcolor_bool
-  {
-    \mdfapptodefinestyle { example }
+    \bool_if:NT \g__mn_xcolor_bool
       {
-        frametitlefont = \normalfont\bfseries\color{MNextitle} ,
-        linecolor = MNexline ,
-        backgroundcolor = MNexbg ,
+        \mdfapptodefinestyle { definition }
+          {
+            frametitlefont = \normalfont\bfseries\color{MNdefntitle} ,
+            linecolor = MNdefnline ,
+            backgroundcolor = MNdefnbg ,
+          }
       }
-  }
 
-\mdtheorem
-  [ style = theorem ]
-  { thm }
-  { Theorem }
-% \newtheorem{shortthm}[thm]{Theorem}
-\mdtheorem
-  [ style = minor-theorem ]
-  { lem }
-  { Lemma }
-\mdtheorem
-  [ style = minor-theorem ]
-  { cor }
-  { Corollary }
-\mdtheorem
-  [ style = minor-theorem ]
-  { prop }
-  { Proposition }
-
-% \theoremstyle{definition}
-\mdtheorem
-  [ style = definition ]
-  { defn }
-  { Definition }
-\mdtheorem
-  [ style = definition ]
-  { notation }
-  { Notation }
-
-% \theoremstyle{remark}
-\mdtheorem
-  [ style = example ]
-  { ex }
-  { Example }
-
-\skip_new:N \mn__note_title_after_skip
-\skip_set:Nn \mn__note_title_after_skip { 1em plus 0.25em minus 0.75em }
-\cs_set:Npn \mn__note_title:n #1
-  {
-    \textbf
+    \mdfdefinestyle { note }
       {
-        \exp:w \mn__color:n { MNnotetitle }
-        #1
+        topline = false ,
+        rightline = false ,
+        bottomline = false ,
+        linewidth = 2pt ,
       }
-    \skip_horizontal:N \mn__note_title_after_skip
-  }
 
-\newmdenv
-  [
-    style = note ,
-    startinnercode = \mn__note_title:n { Note: } ,
-  ]
-  { note }
+    \bool_if:NT \g__mn_xcolor_bool
+      {
+        \mdfapptodefinestyle { note }
+          {
+            frametitlefont = \normalfont\bfseries\color{MNnotetitle} ,
+            linecolor = MNnoteline ,
+            backgroundcolor = MNnotebg ,
+          }
+      }
 
-\newmdenv
-  [
-    style = note ,
-    startinnercode = \mn__note_title:n { Remark: } ,
-  ]
-  { remark }
+    \mdfdefinestyle { example }
+      {
+        theoremtitlefont = \normalfont ,
+      }
 
-\newmdenv
-  [
-    style = note ,
-    startinnercode = \mn__note_title:n { Hint: } ,
-  ]
-  { hint }
+    \bool_if:NT \g__mn_xcolor_bool
+      {
+        \mdfapptodefinestyle { example }
+          {
+            frametitlefont = \normalfont\bfseries\color{MNextitle} ,
+            linecolor = MNexline ,
+            backgroundcolor = MNexbg ,
+          }
+      }
 
-\newmdenv
-  [
-    style = note ,
-    startinnercode = \mn__note_title:n { Abuse of notation: } ,
-  ]
-  { abuse-of-notation }
+    \mdtheorem
+      [ style = theorem ]
+      { thm }
+      { Theorem }
+    % \newtheorem{shortthm}[thm]{Theorem}
+    \mdtheorem
+      [ style = minor-theorem ]
+      { lem }
+      { Lemma }
+    \mdtheorem
+      [ style = minor-theorem ]
+      { cor }
+      { Corollary }
+    \mdtheorem
+      [ style = minor-theorem ]
+      { prop }
+      { Proposition }
 
-% % reset for future defn.s
-% \theoremstyle{plain}
+    % \theoremstyle{definition}
+    \mdtheorem
+      [ style = definition ]
+      { defn }
+      { Definition }
+    \mdtheorem
+      [ style = definition ]
+      { notation }
+      { Notation }
 
-\NewDocumentCommand \TODO { o }
+    % \theoremstyle{remark}
+    \mdtheorem
+      [ style = example ]
+      { ex }
+      { Example }
+
+    \skip_new:N \mn__note_title_after_skip
+    \skip_set:Nn \mn__note_title_after_skip { 1em plus 0.25em minus 0.75em }
+    \cs_set:Npn \mn__note_title:n #1
+      {
+        \textbf
+          {
+            \exp:w \mn__color:n { MNnotetitle }
+            #1
+          }
+        \skip_horizontal:N \mn__note_title_after_skip
+      }
+
+    \newmdenv
+      [
+        style = note ,
+        startinnercode = \mn__note_title:n { Note: } ,
+      ]
+      { note }
+
+    \newmdenv
+      [
+        style = note ,
+        startinnercode = \mn__note_title:n { Remark: } ,
+      ]
+      { remark }
+
+    \newmdenv
+      [
+        style = note ,
+        startinnercode = \mn__note_title:n { Hint: } ,
+      ]
+      { hint }
+
+    \newmdenv
+      [
+        style = note ,
+        startinnercode = \mn__note_title:n { Abuse of notation: } ,
+      ]
+      { abuse-of-notation }
+
+    % % reset for future defn.s
+    % \theoremstyle{plain}
+  } % }}}
+
+\NewDocumentCommand \TODO { o } % {{{
   {
     \framebox
       {
         \textbf{ TODO \IfValueT { #1 } { :~} }
         \IfValueT { #1 } { #1 }
       }
-  }
+  } % }}}
 
-% \bool_if:NT \g__mn_titles_bool
+% \bool_if:NT \g__mn_titles_bool % {{{
   % {
     % \RequirePackage{titlesec}
     % % \titleformat { \command } [ shape ] { format } { label } { sep } { before-code } [ after-code ]
@@ -843,25 +845,25 @@
     % \titlespacing* { \section }       { 0em } { 2em } { 0.5em } [ 0em ]
     % \titlespacing* { \subsection }    { 0em } { 1em } { 0em } [ 0em ]
     % \titlespacing* { \subsubsection } { 0em } { 1em } { 0em } [ 0em ]
-  % }
+  % } % }}}
 
 \RequirePackage[hidelinks]{hyperref}
 
-\bool_if:NT \g__mn_xcolor_bool
+\bool_if:NT \g__mn_xcolor_bool % {{{
   {
     \hypersetup
       {
         colorlinks = true ,
         allcolors = MNlink ,
       }
-  }
+  } % }}}
 
 \bool_if:NT \g__mn_index_bool
   {
     \bool_set_true:N \g__mn_knowledge_bool
   }
 
-\bool_if:NTF \g__mn_knowledge_bool
+\bool_if:NTF \g__mn_knowledge_bool % {{{
   {
     \bool_if:NT \g__mn_xcolor_bool
       {
@@ -881,7 +883,7 @@
     % Disable the redefined \label command; this fixes some documents.
     \KnowledgeConfigureBooleanOption[\knowledge_configuration_label_autoscope_bool]{patch~label}
 
-    % Patch in the automatic-AP feature:
+    % {{{ Patch in the automatic-AP feature
     \bool_new:N \g__mn_noAP_bool
     \NewDocumentCommand \noAP { }
       { \bool_gset_true:N \g__mn_noAP_bool }
@@ -927,8 +929,9 @@
     \apptocmd { \enumerate }   { \mn__use_itemAP: } { } { }
     \apptocmd { \itemize }     { \mn__use_itemAP: } { } { }
     \apptocmd { \description } { \mn__use_itemAP: } { } { }
+    % }}}
 
-    % Make some better styles.
+    % {{{ Make some better styles.
     \knowledgeconfigure
       {
         visible~anchor~points = false
@@ -988,6 +991,8 @@
           {
           }
       }
+    \cs_undefine:N \mn__knowledgestyles:nn
+    % }}}
   }
   {
     % If we don't load the knowledge package, provide a *similar* interface
@@ -1000,7 +1005,7 @@
     \ProvideDocumentCommand \reintro { s o m } { #3 }
     \ProvideDocumentCommand \intro { d() o d() m } { #4 }
     \ProvideDocumentCommand \kl { d() o d() m } { #4 }
-  }
+  } % }}}
 
 \bool_if:NT \g__mn_index_bool
   {
@@ -1012,7 +1017,7 @@
 \ProvideDocumentCommand \emailstyle { m } { \texttt{#1} }
 % The \email command typesets an email; if the user has loaded the
 % hyperref package, we can add a link as well.
-\mn__if_package_loaded:nTF { hyperref }
+\mn__if_package_loaded:nTF { hyperref } % {{{
   {
     \ProvideDocumentCommand \email { m }
           { \href{mailto:#1}{\emailstyle{#1}} }
@@ -1020,9 +1025,9 @@
   {
     \ProvideDocumentCommand \email { m }
           { \emailstyle{#1} }
-  }
+  } % }}}
 
-\bool_if:NT \g__mn_tabu_bool
+\bool_if:NT \g__mn_tabu_bool % {{{
   {
     \RequirePackage{multirow}
     \RequirePackage{booktabs}
@@ -1035,9 +1040,9 @@
           { #1 } % ...with column-spec #1...
           { \textbf{#2} } % Typeset #2 in bold.
       }
-  }
+  } % }}}
 
-\bool_if:NT \g__mn_figures_bool
+\bool_if:NT \g__mn_figures_bool % {{{
   {
     % figure captions
     \RequirePackage{graphicx}
@@ -1048,19 +1053,21 @@
         font   = { sf, footnotesize },
         margin = 1in
       }
-  }
+  } % }}}
 
+% {{{ Footnotes
 \bool_if:NT \g__mn_footnotes_bool
   {
     \PassOptionsToPackage{bottom, hang}{footmisc}
     \RequirePackage{footmisc}
   }
 \setlength { \footnotesep } { \baselineskip }
+% }}}
 
 % Document style.
 \setlength { \parindent } { 0em }
 \setlength { \parskip }   { 1em }
-% Set \parskip=0 around \tableofcontents
+% {{{ Set \parskip=0 around \tableofcontents
 \pretocmd { \tableofcontents }
   {
     \group_begin:
@@ -1070,7 +1077,8 @@
 \apptocmd { \tableofcontents }
   { \group_end: }
   { } { }
+% }}}
 
-% % This has to be hooked so that it doesn't break the other bools undefined
-% % with it first.
+% This has to be hooked so that it doesn't break the other bools undefined
+% with it first.
 \AtEndOfPackage { \cs_undefine:N \mn__legacy_bool_undefine:n }

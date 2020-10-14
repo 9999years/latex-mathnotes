@@ -30,7 +30,7 @@
 \mn__undefine_thm:n { notation }
 \mn__undefine_thm:n { ex }
 
-\cs_undefine:N \mn__undefine_thm
+\cs_undefine:N \mn__undefine_thm:n
 
 \theoremstyle { definition }
 \newtheorem { thm } { Theorem }
