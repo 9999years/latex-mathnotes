@@ -55,6 +55,8 @@
 % Label prepended to problem numbers.
 \tl_const:Nn \g__mn_problem_string_tl { Problem }
 
+\skip_const:Nn \g__mn_problem_before_skip { 2em }
+
 % Label appended to problem numbers; omitted from PDF bookmarks.
 \tl_const:Nn \g__mn_problem_after_tl { . }
 
@@ -80,6 +82,7 @@
   {
     problem~string .value_required:n = true ,
     problem~string .tl_set:N = \g__mn_problem_string_tl ,
+    problem~before~skip .skip_set:N = \g__mn_problem_before_skip
   }
 
 \keys_define:nn { mn__problem }
@@ -157,6 +160,8 @@
         % Some number given, *maybe* empty
         \tl_set_eq:NN \mn__problem_number_current_tl \mn__problem_number_tl
       }
+
+    \vspace { \skip_use:N \g__mn_problem_before_skip }
 
     \phantomsection
     \addcontentsline
