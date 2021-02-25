@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> { } }:
 let
   # mathnotes version number and version date
   versionNumber = "0.2.10";
@@ -8,19 +8,20 @@ let
 
   charter = stdenv.mkDerivation rec {
     pname = "charter";
-    version = "200512";
+    version = "210112";
 
     src = fetchzip {
       url = "https://practicaltypography.com/fonts/Charter%20${version}.zip";
       name = "Charter-${version}.zip";
-      sha256 = "1832amplwrxp3cwyf2xnc47f5fasbwhdc2i4sblbhgdgga07pxa0";
+      sha256 = "0z5jwvksvpfji90zji48gcby04pwgw8xf37q2i72n4n1wakqrhmf";
     };
 
     dontConfigure = true;
     dontBuild = true;
     installPhase = ''
       mkdir -p $out/fonts/opentype/public
-      mv "Charter/OpenType" $out/fonts/opentype/public/charter
+      mv "OTF format (best for Mac OS)/Charter" \
+         $out/fonts/opentype/public/charter
       mv "Charter license.txt" $out/fonts/opentype/public/charter/LICENSE.txt
       # mv "Charter/OpenType TT" $out/share/fonts/truetype
       # mv "Charter/WOFF" $out/share/fonts/woff
@@ -43,16 +44,13 @@ let
       version = "${date} ${versionNumber}";
 
       buildInputs = [
-        (
-          texlive.combine rec {
-            inherit (texlive)
-              scheme-small collection-xetex latexmk collection-latexrecommended
-              ltxguidex translations framed enumitem showexpl babel babel-german
-              babel-english changepage fira varwidth
-              ;
-            charter = charter-texlive;
-          }
-        )
+        (texlive.combine rec {
+          inherit (texlive)
+            scheme-small collection-xetex latexmk collection-latexrecommended
+            ltxguidex translations framed enumitem showexpl babel babel-german
+            babel-english changepage fira varwidth;
+          charter = charter-texlive;
+        })
         sd
       ];
 
@@ -71,31 +69,29 @@ let
       ];
 
       dontConfigure = true;
-      buildPhase = let
-        latexmk = "latexmk -pdf -r ./latexmkrc -pvc- -pv-";
-      in
-        ''
-          sd --string-mode '${versionSentinel}' '${version}' *.tex *.sty *.cls
-          sd --string-mode '${dateSentinel}' '${date}' *.tex *.sty *.cls
-          ${lib.optionalString pdf "${latexmk} *.tex"}
+      buildPhase = let latexmk = "latexmk -pdf -r ./latexmkrc -pvc- -pv-";
+      in ''
+        sd --string-mode '${versionSentinel}' '${version}' *.tex *.sty *.cls
+        sd --string-mode '${dateSentinel}' '${date}' *.tex *.sty *.cls
+        ${lib.optionalString pdf "${latexmk} *.tex"}
 
-          rm -rf ${pkg}
-          mkdir ${pkg}
-          cp $distSrcs ${pkg}
-        '';
+        rm -rf ${pkg}
+        mkdir ${pkg}
+        cp $distSrcs ${pkg}
+      '';
 
       installPhase = ''
         ${if tar then ''
-        tar -czf ${pkg}.tar.gz ${pkg}
-        tar -tvf ${pkg}.tar.gz
-        cp ${pkg}.tar.gz $out
-      '' else ''
-        mkdir -p $out
-        cp -r ${pkg} $out
-      ''}
+          tar -czf ${pkg}.tar.gz ${pkg}
+          tar -tvf ${pkg}.tar.gz
+          cp ${pkg}.tar.gz $out
+        '' else ''
+          mkdir -p $out
+          cp -r ${pkg} $out
+        ''}
       '';
     };
-  tar = build {};
+  tar = build { };
   dir = build {
     pdf = false;
     tar = false;
@@ -105,11 +101,11 @@ let
   # Copied from nixpkgs.
   combinePkgs = pkgSet:
     lib.concatLists # uniqueness is handled in `texlive.combine`
-      (lib.mapAttrsToList (_n: a: a.pkgs) pkgSet);
+    (lib.mapAttrsToList (_n: a: a.pkgs) pkgSet);
 
   mathnotes-texlive-deps = combinePkgs {
     inherit (texlive)
-      # article.cls: needed by ./mathnotes-formula-sheet.cls
+    # article.cls: needed by ./mathnotes-formula-sheet.cls
       latex
 
       # multicol.sty: needed by ./mathnotes-formula-sheet.cls
@@ -168,43 +164,31 @@ let
       graphics # graphicx.sty (optional, non-default)
       caption # caption.sty (optional, non-default)
       footmisc # footmisc.sty (optional, non-default)
-      ;
+    ;
   };
 
-in
-{
+in {
   inherit tar dir dir-pdf;
   texlive = {
-    pkgs = lib.singleton (
-      (
-        dir.overrideAttrs (
-          old: {
-            tlType = "run";
-            installPhase = old.installPhase + ''
-              mkdir -p $out/tex/latex/
-              mv $out/${old.pkg} $out/tex/latex/
-            '';
-          }
-        )
-      )
-    ) ++ mathnotes-texlive-deps;
+    pkgs = lib.singleton ((dir.overrideAttrs (old: {
+      tlType = "run";
+      installPhase = old.installPhase + ''
+        mkdir -p $out/tex/latex/
+        mv $out/${old.pkg} $out/tex/latex/
+      '';
+    }))) ++ mathnotes-texlive-deps;
   };
   mathnotes-transitive = stdenv.mkDerivation {
     pname = "mathnotes";
     version = "0.0.0";
     src = ./.;
     buildInputs = [
-      (
-        texlive.combine (
-          {
-            inherit (texlive)
-              collection-latex # Stuff i don't want to deal with.
-              latexmk
-              ;
-            mathnotes-deps = { pkgs = mathnotes-texlive-deps; };
-          }
-        )
-      )
+      (texlive.combine ({
+        inherit (texlive)
+          collection-latex # Stuff i don't want to deal with.
+          latexmk;
+        mathnotes-deps = { pkgs = mathnotes-texlive-deps; };
+      }))
     ];
   };
 }
