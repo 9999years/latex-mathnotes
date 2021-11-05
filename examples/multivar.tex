@@ -1,0 +1,474 @@
+\documentclass[knowledge]{mathnotes}
+\title{Multivariable Calculus}
+\mathnotes{
+  instructor  = Prof.~Corey Bregman ,
+  name        = Rebecca Turner ,
+  email       = rebeccaturner@brandeis.edu ,
+  course      = \textsc{math} 20a (multivariable calculus) ,
+  institution = Brandeis University ,
+  semester    = Fall 2019 ,
+}
+
+\ExplSyntaxOn
+\NewDocumentCommand \normalized { m }
+  { \frac { #1 } { \| #1 \| } }
+\let \gr \grad
+\def \ddx { \frac{d}{dx} }
+% VL = vector literal
+\NewDocumentCommand \vl { m } { \left\langle #1 \right\rangle }
+\ExplSyntaxOff
+
+% \makeatletter
+% \@ifpackageloaded{knowledge}
+%   {
+\knowledge{notion, index={Derivative!Partial}}
+  | partial derivative
+\AtBeginDocument{\index{Partial derivative|see{Derivative, partial}}}
+
+\knowledge{notion, index={Derivative!Directional}}
+  | directional derivative
+\AtBeginDocument{\index{Directional derivative|see{Directional, partial}}}
+
+\knowledge{notion, index=Unit vector}
+  | unit vector
+
+\knowledge{notion, index=Limit}
+  | limit
+
+\knowledge{notion, index={Differentiable functions}}
+  | differentiable
+
+\knowledge{notion, index=Gradient}
+  | gradient
+
+\knowledge{notion, index={Neighborhood (topology)}}
+  | neighborhood
+
+\knowledge{notion, index=Local maximum}
+  | local maximum
+  | local maxima
+
+\knowledge{notion, index=Local minimum}
+  | local minimum
+  | local minima
+
+\knowledge{notion, index=Absolute maximum}
+  | absolute maximum
+  | absolute maxima
+
+\knowledge{notion, index=Absolute minimum}
+  | absolute minimum
+  | absolute minima
+
+\knowledge{notion, index=Local extremum}
+  | local extremum
+  | local extrema
+
+\knowledge{notion, index=Critical point}
+  | critical point
+
+\knowledge{notion, index=Saddle point}
+  | saddle point
+
+\knowledge{notion, index={Lagrange multiplier}}
+  | Lagrange multiplier
+  | Lagrange multipliers
+  | the method of Lagrange multipliers
+
+\knowledge{url={https://en.wikipedia.org/wiki/Joseph-Louis_Lagrange}}
+  | Joseph-Louis Lagrange
+  | Lagrange
+
+\knowledge{url={https://en.wikipedia.org/wiki/Marquis_de_Condorcet}}
+    | Marquis de Condorcet
+
+  \knowledge{url={https://en.wikipedia.org/wiki/Adrien-Marie_Legendre}}
+    | Adrien-Marie Legendre
+%   }
+%   {}
+% \makeatother
+\date{2019-10-23}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter{Vectors}
+I already know about vectors --- I've been taught them in about five
+different courses so far. I'm skipping this.
+
+\chapter{Partial derivatives}
+
+If we have a function of multiple variables, say
+\[f(a_1, a_2, a_3, \dots),\]
+we might care about the change of $f$ with respect to only one variable. By
+picking a fixed value for all but one of the variables, we can determine
+this.
+
+Say that we want to find the "partial derivative" of $f$ with respect to
+$a_2$; then, by constructing $g(a_2) = f(c_1, a_2, c_3, \dots)$, we've
+created a function of \emph{one} variable, which we can differentiate as
+usual.
+\begin{notation}
+  We write the "partial derivative" of a function $f$ at a point $\vec p$ 
+  with respect to a basis element $a$ of $\vec p$ as \fbox{$f_a(\vec p)$.}
+
+  We may also use much more common notation
+  \[\pd[f]{a},\]
+  using the "partial derivative" symbol $\partial$, a stylized cursive
+  ``d''.\footnote{Introduced by "Marquis de Condorcet" in 1770, who used it
+  to represent a partial \emph{differential}, i.e.~the $dy$ or $dx$ in
+  $dy/dx$, and then adapted in 1786 by "Adrien-Marie Legendre" for use as the
+  partial derivative.}
+
+  In the interest of completeness, I'll exhaustedly note that the book also
+  uses, on occasion, the notation $D_a f$.
+\end{notation}
+
+We can also calculate ""higher partial derivatives"" --- similarly to the
+higher ordinary derivatives. The notation is a fairly clear extension:
+\[(f_x)_x = f_{xx} = \pd x \left( \pd[f]{x} \right) = \pd[^2 f]{x^2}.\]
+
+\begin{thm}[Clairaut's Theorem]
+  Suppose $f$ is defined on a neighborhood $N$ about a point $\vec p$.
+  If $f_{xy}$ and $f_{yx}$ are continuous in $N$, then $f_{xy}(\vec p) =
+  f_{yx}(\vec p)$.
+\end{thm}
+
+\section{Gradients}
+\begin{notation}
+  This ridiculous textbook denotes the "partial derivative" of a function
+  $f(x, y) = z$ with respect to  $x$ as $f_x(x, y)$.
+\end{notation}
+
+\begin{defn}
+  The ""directional derivative"" of a function $f$ at $(x_0, y_0)$ in the
+  direction of a "unit vector" $\vec u = \langle a, b \rangle$ is
+  \[D_{\vec u} f(x_0, y_0) = \lim_{h \to 0} \frac{f(x_0 + ha, y_0 + hb) -
+  f(x_0, y_0)}{h},\]
+  if the "limit" exists.
+\end{defn}
+
+If $f : \Re^2 \mapsto \Re$ is a "differentiable" function, then $f$ has a
+"directional derivative" in the direction of any "unit vector" $\vec u =
+\langle a, b \rangle$ of
+\begin{alignat*}{1}
+  D_{\vec u} f(x, y) &= f_x(x, y) a + f_y(x, y) b.
+\intertext{Or, if $\vec u = \langle \cos \theta, \sin \theta \rangle$, then}
+  D_{\vec u} f(x, y) &= f_x(x, y) \cos \theta + f_y(x, y) \sin \theta.
+\end{alignat*}
+
+Noticing that the "directional derivative" of a function can be written as
+the dot product of two vectors,
+\begin{alignat*}{1}
+  D_{\vec u} f(x, y) &= f_x(x, y) a + f_y(x, y) b \\
+    &= \langle f_x(x, y), f_y(x, y) \rangle \cdot \langle a, b \rangle \\
+    &= \langle f_x(x, y), f_y(x, y) \rangle \cdot \vec u,
+\end{alignat*}
+we call the first vector $\langle f_x(x, y), f_y(x, y) \rangle$ the
+""gradient"" of $f$ and denote it as $\grad f$.
+
+\begin{defn}
+  The "gradient" of a function $f$ of two variables is defined as
+  \[\grad f(x, y) = \langle f_x(x, y), f_y(x, y) \rangle
+    = \frac{\partial f}{\partial x} \vec i + \frac{\partial f}{\partial y}
+    \vec j.\]
+\end{defn}
+
+Therefore, we can rewrite the "directional derivative" of a function $f$
+as
+\[D_{\vec u} f(x, y) = \grad f(x, y) \cdot \vec u.\]
+It's intuitive, then, that the maximum value of the "directional derivative"
+is $|\grad f(x, y)|$, when $\vec u$ is parallel to $\grad f(x, y)$.
+
+\section{Maximum and minimum values}
+\begin{defn}
+  $f : A^k \mapsto B$ has a ""local maximum"" at $\vec a$ if for some
+  "neighborhood" $N \subset A$ about $\vec a$, for all $\vec x \in N$,
+  $f(\vec x) \le f(\vec a)$.
+
+  Conversely, if $f(\vec x) \ge f(\vec a)$, then $f(\vec a)$ is a ""local
+  \emph{minimum}@local minimum"".
+
+  If the statement also holds true for $N = A$, then $\vec a$ is an
+  ""absolute maximum"" (or ""absolute minimum"").
+\end{defn}
+
+If $f$ has a "local maximum" or "minimum@local minimum" at $\vec a$ and the
+partials of $f$ exist at $\vec a$, then $\partial f/\partial x (\vec a) = 0$
+and $f_y(a, b) = 0$; geometrically, the tangent plane to a maximum or
+minimum must be horizontal.
+
+\begin{defn}
+  A point $\vec a$ is called a ""critical point"" of $f$ if $f_x(\vec a) =
+  0$ or $f_x(\vec a)$ doesn't exist for all variables of $f$.
+\end{defn}
+
+\begin{defn}
+  A ""saddle point"" of a function is a "critical point" which is not a
+  "local extremum" of the function.
+\end{defn}
+
+If $(a, b)$ is a critical point of $f$, then let
+\[D = D(a, b) = f_{xx} (a,b) \, f_{yy} (a,b) - (f_{xy}(a,b))^2.\]
+If $D < 0$, then $(a, b)$ is a "saddle point" of $f$.
+
+\section{Lagrange multipliers}
+Often we want to find the "local extrema" of a function subject to
+constraints, i.e.~maximizing the volume of an object while keeping its
+surface area constant. The method of "Lagrange multipliers"\footnote{After
+"Joseph-Louis Lagrange" (1736--1813), ``an Italian Enlightenment Era
+mathematician and astronomer [who] made significant contributions to the
+fields of analysis, number theory, and both classical and celestial
+mechanics.''} is a strategy for doing this.
+
+To find extrema of $f(\vec p)$ constrained with $g(\vec p) = k$,
+we look for extrema of $f$ that are restricted to lie on the level curve
+$g(\vec p) = k$; it happens that the largest $c$ such that $f(\vec p) = c$
+intersects with  $g(\vec p) = k$ when the two level curves are tangent with
+each other, i.e.~they have identical normals. In other words, for some
+scalar $\lambda$, $\grad f(\vec p) = \lambda \grad g(\vec p)$.
+
+More formally, suppose $f$ has an extrema at $\vec p_0$. Then, let the level
+surface generated by the constraint $g(\vec p) = k$ be called $S$, where
+$\vec p_0 \in S$. Then, let $C$ be the set of points given by $\vec r(t)$ such
+that $C \subset S$ and $\vec p_0 \in C$. Further, let $t_0$ be a point such
+that $\vec r(t_0) = \vec p_0$.
+
+Then, $f \after \vec r$ gives the values of $f$ on the curve $C$. $f$ has an
+extrema at $\vec p$, so $f \after \vec r$ must also, and $(f \after \vec
+r)'(t_0) = 0$. If $f$ is "differentiable", we can use the chain rule to
+write
+\begin{alignat*}{1}
+  0 &= (f \after \vec r)'(t_0) \\
+  &= \grad f(\vec p_0) \cdot \vec r'(t_0).
+\end{alignat*}
+Therefore, the gradient of $f$ is orthogonal to the tangent of every such
+curve $C$. We also know that $\grad g(\vec p_0)$ is orthogonal to $\vec
+r'(t_0)$, so the gradients of $f$ and $g$ at $\vec p_0$ must be parallel.
+Therefore, if $\grad g(\vec p_0) \ne 0$, there exists some $\lambda$ such
+that
+\begin{equation}
+  \grad f(\vec p_0) = \lambda \grad g(\vec p_0),
+\end{equation}
+where the constant $\lambda$ is called a "Lagrange multiplier".
+
+Then, the ""method of Lagrange multipliers"" gives us a process to
+find the maximum and minimum values of a function $f(\vec p)$ subject to the
+constraint  $g(\vec p) = k$, where $\vec p \in \Re^n$. To use the method of
+Lagrange multipliers, we assume that the extreme values exist and that
+$\grad g \ne 0$ on the level surface $g(\vec p) = k$.
+\begin{enumerate}
+  \item Find all values of $\vec p$ and $\lambda$ such that
+  \begin{alignat*}{1}
+    \grad f(\vec p) &=  \lambda \grad g(\vec p) \\
+  \text{and}\qquad g(\vec p) &= k. \\
+  \end{alignat*}
+
+  \item Next, evaluate $f$ at all of the points found in the first step. The
+  largest of these values is the maximum value of $f$, and the smallest of
+  them is the minimum value.
+\end{enumerate}
+
+\chapter{Multiple integrals}
+Single integrals are good for functions of one variable. To integrate
+functions of multiple variables, we use multiple integrals. Straightforward
+enough.
+
+Multiple integrals allow us to calculate things like surface areas and
+volumes of geometric objects.
+
+In general, for some double integral
+\[\underbrace{\int_a^b \overbrace{\int_c^d f(x,y)\,dx}^{\mathclap{\text{We
+treat $y$ as constant while evaluating this.}}}\,dy,}_{\mathclap{\text{We've
+eliminated $x$ from the equation before evaluating this.}}}\]
+we do the opposite of partial differentiation and treat all variables other
+than the one we're integrating for as constant, repeatedly, until we've
+integrated with respect to all variables; each step in this process is
+called, predictably, ""partial integration"".
+
+\section{Double integrals}
+For an axis-aligned rectangle $R$ on the $xy$-plane from $(x_0, y_0)$ to $(x_1,
+y_1)$, the area of a function $f(x, y)$ under $R$ is given by the double
+integral
+\begin{alignat*}{1}
+  \iint_{Y} f(x,y)\,dA &= \underbrace{\int_{x_0}^{x_1} \int_{y_0}^{y_1}
+    f(x,y)\,dy\,dx}_{\mathclap{\text{This is the iterated form of the
+    integral.}}} \\
+    &= \int_{y_0}^{y_1} \int_{x_0}^{x_1} f(x,y)\,dx\,dy, \\
+\end{alignat*}
+where we use $\iint_R$ to mean ``integrating over the area of $R$'' and
+``$dA$'' to mean ``with respect to area.''
+
+The right-hand side of the equation above is called the ""iterated form"",
+or an \reintro*"iterated integral".
+
+We can also iterate over funkier regions if we're willing to play with the
+limits of integration a bit. The easiest regions to integrate over are the
+ones that are easily expressible as the region bounded above and below by
+functions of one variable, e.g. ``the region under the line $y = 2x$ and
+above the line $y = x^2$'' (note that this is bounded on the left at $x = 0$
+and on the right at $x = 2$).
+
+% Area[ImplicitRegion[x^2 < y \[And] y < 2 x, {x, y}
+The area of that region is expressed by the integral
+\begin{alignat*}{1}
+  A &= \int_0^2 \int_{x^2}^{2x}\,dy\,dx \\
+    &= \int_0^2 {\bigg[ x \bigg]}_{x^2}^{2x}\,dx \\
+    &= \int_0^2 {\bigg( 2x-x^2 \bigg)}\,dx \\
+    &= {\left[ x^2 - \frac{x^3}{3} \right]}_0^2 \\
+    &= 4 - \frac{8}{3} = \frac{4}{3}.
+\end{alignat*}
+
+A more complicated region might be ``the region under the paraboloid $z =
+x^2 + y^2$ and above the region in the $xy$-plane bounded by $y = \sqrt{x}$
+and $y=1-\cos x$.''
+
+We can build larger regions out of pieces, by summing smaller integrals.
+
+\section{Polar coordinates}
+Use the conversions
+\begin{alignat*}{1}
+  r &= \sqrt{x^2+y^2} \\
+  x &= r\cos\theta \\
+  y &= r\sin\theta \\
+\intertext{for the coordinates and then we have that if $R$ is a ``polar
+rectangle'' (arc-shaped region bounded by angles and radii) from $r=a$ to
+$r=b$ and $\theta = \alpha$ to $\theta = \beta$, we have}
+  \iint_R f(x,y)\,dA &= \int_\alpha^\beta \int_a^b f(r\cos\theta,
+  r\sin\theta)r\,dr\,d\theta, \\
+\intertext{which makes our lives easier for circly areas and volumes. Don't
+forget to multiply by $r$.
+\endgraf
+For squiggly and varying radii, we can use functions $h_1(\theta)$ and
+$h_2(\theta)$ instead of constants $a$ and $b$:}
+  \iint_D f(x,y)\,dA &= \int_\alpha^\beta \int_{h_1(\theta)}^{h_2(\theta)} f(r\cos\theta,
+  r\sin\theta)r\,dr\,d\theta. \\
+\end{alignat*}
+
+\section{Cylindrical coordinates}
+Just add $z$.
+
+\section{Spherical coordinates}
+I can never remember how these work. If we have a point $P$, and we drop it
+down to the $xy$-plane, the angle between the positive $x$-axis and the
+segment from the origin to $P$ is $\theta$.
+
+Next, the angle between the positive $z$-axis and the segment from the origin
+to $P$ is $\phi$.
+
+Finally, the length of the segment from the origin to $P$ is $\rho$.
+
+The conversions
+\begin{alignat*}{1}
+  x &= \rho \sin \phi \cos \theta \\
+  y &= \rho \sin \phi \sin \theta \\
+  z &= \rho \cos \phi \\
+\intertext{give us the integral-conversion for the spherical wedge bounded
+by $a \le \rho \le b, \alpha \le \theta \le \beta, c \le \phi \le d$ as}
+  \iiint_E f(x,y,z)\,dV &= \int_c^d \int_\alpha^\beta \int_a^b
+    f(\rho \sin\phi \cos\theta,\,
+      \rho \sin\phi \sin\theta,\,
+      \rho \cos \theta)
+    [\rho^2 \sin\phi]
+    \,d\rho\,d\theta\,d\phi. \\
+\end{alignat*}
+Very gross!
+
+\section{Surface area}
+
+For $f(x,y)$ with $f_x$, $f_y$ continuous, the surface area of $f$ within
+a region $D$ is
+\[A = \iint_D \left(\sqrt{f_x(x,y)^2 + f_y(x,y)^2 + 1}\right) \,dA.\]
+
+% Need notes on:
+%   - Change of variables (in multiple integrals)
+
+\chapter{Vector calculus}
+A vector field is a mapping $\R^k \mapsto \R^n$; for each point in
+$k$-dimensional Euclidean space, we associate an $n$-dimensional vector.
+These vectors can represent velocity, distance, or anything else, and come
+up in all sorts of applied fields.
+
+We'll be mostly concerned with vector fields $\R^2\mapsto\R^2$ and
+$\R^3\mapsto\R^3$.
+
+If we have a plane curve given by the vector equation
+\begin{alignat*}{1}
+  \vec r(t) &= \left< x(t), y(t) \right> \qquad a \le t \le b, \\
+\intertext{then the line integral of $f$ along $\vec r(t)$ from $a$ to $b$
+is}
+  & \int_a^b f(x(t), y(t)) \sqrt{{\left(\dd[x]{t}\right)}^2 +
+  {\left(\dd[y]{t}\right)}^2}\,dt,
+\end{alignat*}
+i.e.\ the length of the curve multiplied, at each point, by the value of the
+vector field $f$ at that point.
+
+% Need notes on:
+% 16.1, 16.2, 16.3, 16.4, 16.5,
+% Need to update cheat sheet.
+
+\appendix
+\chapter{Common formulas for derivatives and integrals}
+\backmatter
+\section{Derivatives}
+
+\begin{alignat*}{2}
+  \ddx&\;& (f + g) &= f' + g' \\
+  \ddx&& x^n &= nx^{n - 1} \\
+  \ddx&& (fg) &= fg' + f'g \\
+  \ddx&& \frac{h}{l} &= \frac{l h' - h l'}{l^2} \\
+  \ddx&& f(g(x)) &= f'(g(x)) g'(x) \quad\text{(Chain rule.)} \\
+  \ddx&& b^x &= b^x \ln b \\
+  \ddx&& f^{-1}(x) &= \frac{1}{f'(f^{-1}(x)} \\
+  \ddx&& c &= 0 \\
+  \ddx&& c\,f &= c\,f' \\
+  \ddx&& e^x &= e^x \\
+  \ddx&& e^{f(x)} &= f'(x) e^{f(x)} \quad\text{(By the chain rule.)}  \\
+  \ddx&& \ln x &= \frac{1}{x} \\
+  \ddx&& \log_b x &= \frac{1}{x \ln b} \\
+  \ddx&& [\vec u \cdot \vec v] &= \vec u' \cdot \vec v + \vec u \cdot \vec v' \\
+  \ddx&& [\vec u \times \vec v] &= \vec u' \times \vec v + \vec u \times \vec v' \\
+\end{alignat*}
+
+\subsection{Trigenometric}
+\begin{alignat*}{2}
+  \ddx&\;& \sin x &= \cos x \\
+  \ddx&& \cos x &= -\sin x \\
+  \ddx&& \tan x &= \sec^2 x \\
+  \ddx&& \cot x &= -\csc^2 x \\
+  \ddx&& \sec x &=  \sec x \tan x \\
+  \ddx&& \csc x &=  -\csc x \cot x \\
+  % inverse
+  \ddx&& \sin^{-1} x &= \frac{ 1}{\sqrt{1 - x^2}} \\
+  \ddx&& \cos^{-1} x &= \frac{-1}{\sqrt{1 - x^2}} \\
+  \ddx&& \tan^{-1} x &= \frac{ 1}{1 + x^2} \\
+  \ddx&& \cot^{-1} x &= \frac{-1}{1 + x^2} \\
+  \ddx&& \sec^{-1} x &= \frac{ 1}{|x| \sqrt{x^2 - 1}} \\
+  \ddx&& \csc^{-1} x &= \frac{-1}{|x| \sqrt{x^2 - 1}} \\
+\end{alignat*}
+
+\section{Integrals}
+See also:
+\emph{\href{https://www.whitman.edu/mathematics/calculus/calculus_08_Techniques_of_Integration.pdf}{Techniques
+of Integration}}.
+\begin{alignat*}{1}
+  \int x^n\,dx &= \frac{x^{n + 1}}{n + 1} + C \quad \text{when } n \ne -1 \\
+  \int x^{-1}\,dx &= \ln|x| + C \\
+  \int e^x\,dx &= e^x + C \\
+  \dd{t} \int_{a(t)}^{b(t)} g(s)\,ds &= b'(t) g(b(t)) - a'(t) g(a(t))
+  \quad\text{(Leibniz' rule.)} \\
+  \int uv'\,dx &= uv - \int u'v\,dx \\
+\end{alignat*}
+
+\subsection{Trigenometric}
+\begin{alignat*}{1}
+  \int \sin x\,dx &= -\cos x + C \\
+  \int \cos x\,dx &= \sin x + C \\
+  \int \sec^2 x\,dx &= \tan x + C \\
+  \int \sec x \tan x\,dx &= \sec x + C \\
+  \int \frac{1}{1 + x^2}\,dx &= \tan^{-1} x + C \\
+  \int \frac{1}{\sqrt{1 + x^2}}\,dx &= \sin^{-1} x + C \\
+\end{alignat*}
+
+\printindex
+\end{document}

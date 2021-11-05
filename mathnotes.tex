@@ -39,7 +39,8 @@
 \maketitle
 
 \begin{abstract}
-	Rebecca Turner's personal macros for typesetting mathematics notes.
+	Rebecca Turner's personal macros and styles for typesetting mathematics
+	notes.
 \end{abstract}
 
 \begin{note}
@@ -120,23 +121,66 @@ Some options are enabled by default, and can be disabled by passing
     \end{longtable}
 
   \key{maketitle}[\bool][true]
+    Redefines |\maketitle| and related commands. The provided |\maketitle|
+    command will automatically insert a |\thanks| if any email, course,
+    instructor, institution, or semester is supplied with the |\mathnotes|
+    command.
+
   \key{titles}[\bool][true]
+    No-op; may set the format of sectioning commands in the future.
+
   \key{xcolor}[\bool][true]
-    Load the \ctan{xcolor} package.
+    Load the \ctan{xcolor} package and defines several colors with the |MN|
+    prefix.
+
   \key{theorems}[\bool][true]
+    Set up various theorem environments with the \ctan{ntheorem} and
+    \ctan{mdframed} packages.
+
+    Provides |thm| (Theorem), |lem| (Lemma), |cor| (Corollary), |prop|
+    (Proposition), |defn| (Definition), |notation|, |ex|
+    (Example), |note|, |remark|, |hint|, and |abuse-of-notation| (Abuse of
+    notation) theorem-like environments.
+
   \key{enumitem}[\bool][true]
+    Loads the \ctan{enumitem} package.
+
 \end{keys}
 
 The other options are not enabled by default, and can be enabled by passing
 |<option>| --- the option name --- as a package option:
 \begin{keys}
 	\key{listings}[\bool]
+    Loads the \ctan{listings} and \ctan{xcolor} packages.
+    Sets default styles for listings, including setting the default language to
+    |Mathematica|.
+
   \key{knowledge}\bool]
-  \key{index}\bool]
-  \key{footnotes}\bool]
-  \key{figures}\bool]
-  \key{tabu}\bool]
-  \key{kindle}\bool]
+    Loads the \ctan{knowledge} package and sets up default styles.
+    Patches lists so that manually placing |\AP| and |\itemAP| commands is
+    unecessary.
+
+  \key{index}[\bool]
+    Sets the |knowledge| key and starts indexing with |\makeindex|.
+
+  \key{footnotes}[\bool]
+    Loads the \ctan{footmisc} package and sets up footnotes.
+
+  \key{figures}[\bool]
+    Loads the \ctan{graphicx} and \ctan{caption} packages and sets up figure
+    captions.
+
+  \key{tabu}[\bool]
+    Loads the \ctan{multirow}, \ctan{booktabs}, \ctan{longtable}, and
+    \ctan{tabu} packages.
+
+    Defines the |\Th| command.
+
+  \key{kindle}[\bool]
+    Sets a small page size and tweaks the layout for Kindle devices; designed in
+    particular for whatever generation of Kindle Paperwhite I have.
+    Only compatible with the \ctan{memoir} document class.
+
 \end{keys}
 
 \section{Commands}
@@ -173,8 +217,168 @@ As we saw in
 Equation~\ref{eq:cool}, \dots
 \end{LTXexample}
 
-\section{Packages loaded}
+\begin{desc}
+|\newacronym[<command>]{<text>}|
+\end{desc}
 
-\mn\ loads \ctan{amsmath}, \ctan{ntheorem}.
+Defines |\<command>| to be |\textsc{<text>}|; |<command>| defaults to |<text>|
+if ommitted.
+
+\begin{LTXexample}
+\newacronym{apa}
+\newacronym[\seetan]{ctan}
+
+The \apa\ is not associated
+with \seetan.
+\end{LTXexample}
+
+\begin{desc}
+|\newacronyms{<acronyms>}|
+\end{desc}
+
+Defines a collection of acronym commands together using |\newacronym|;
+|<acronyms>| is a comma-separated list of acronyms.
+
+\begin{LTXexample}
+\newacronyms{apa, mla}
+
+\apa\ and \mla\ are common
+citation styles.
+\end{LTXexample}
+
+\begin{desc}
+|\mathnotes{<key-value pairs>}|
+\end{desc}
+
+\begin{keys}
+  \key{date}[\m{date}]
+  \key{author}[\m{author}]
+  \key{title}[\m{title}]
+    Sets the date, author, or title; setting these keys are equivalent to using the
+    |\date|, |\author|, and |\title| commands, respectively.
+
+  \key{institution}[\m{institution}]
+    Sets the institution (e.g., Brandeis University) associated with the
+    document.
+  \key{course}[\m{course}]
+    Sets the course (e.g., \textsc{math}~23a) associated with the
+    document.
+  \key{semester}[\m{semester}]
+    Sets the semester (e.g., Fall 2018) associated with the document.
+  \key{instructor}[\m{instructor}]
+    Sets the instructor (e.g., Prof.~Ruth~Charney) associated with the document.
+  \key{email}[\m{email}]
+    Sets the email (e.g., \email{rbt@sent.as}) associated with the author.
+\end{keys}
+
+\begin{desc}
+|\TODO[<item>]|
+\end{desc}
+
+Typesets a to-do marker.
+
+\begin{LTXexample}
+\TODO
+
+\TODO[explain in detail]
+\end{LTXexample}
+
+\begin{desc}
+|\email{<email>}|
+\end{desc}
+Typesets an email address, with a link if the \ctan{hyperref} package is loaded.
+
+\begin{LTXexample}
+\email{rbt@sent.as}
+\end{LTXexample}
+
+\begin{desc}
+|\Th[<column spec>]{<header>}|
+\end{desc}
+Typesets a table column header in bold using |\multicolumn|. Especially useful
+if the column in question is a math or numeric column.
+
+\m{column spec} defaults to |l| (left-aligned).
+
+\section{The \texttt{mathnotes} document class}
+
+The \mn\ document class is a \ctan{memoir}-based class that automatically loads
+the \mn\ package.
+
+\section{The \texttt{mathnotes-hw} document class}
+
+The |mathnotes-hw| document class is based on the |mathnotes| document class,
+providing additional commands and styles for typesetting homework assignments.
+Theorems are given subtler styling that takes up less space on the page.
+The author name and title are added to the top-left heading.
+
+\begin{desc}
+|problem| \\
+|\begin{problem}[<number or options>]| \\
+|\prob[<number or options>]{<text>}|
+\end{desc}
+
+The |problem| environment (and its matching shorthand |\prob|) typesets a
+homework problem typesets a homework problem. Problems are added to the table of
+contents at the chapter-level, which is the top level if I remember correctly.
+
+\m{number or options} is a list of key-value pairs:
+
+\begin{keys}
+  \key{number}[\m{number}]
+    Sets the problem's number. For brevity, an unrecognized key with no value
+    is also used as the problem number; this allows concise expressions like
+    |\begin{problem}[4.3a] ...| to specify problem numbers (to match textbook
+    problem numbers, for example). Otherwise, problem numbers
+    start at 1 and count up.
+
+  \key{title}[\m{title}]
+    Sets the problem's ``title''.
+
+  \key{label}[\m{label}]
+    Sets the problem's label (e.g., |prob:n-sheeted-covering|), which can be
+    referred to later with |\ref|.
+\end{keys}
+
+If your professor calls them ``exercises'' or something, you can change the
+string used to refer to them with the |\mathnotes| command, which supports an
+additional key in |mathnotes-hw|:
+\begin{keys}
+  \key{problem string}[\m{problem string}][Problem]
+    The string used to represent a problem in titles and contents entries.
+\end{keys}
+
+\pagebreak
+\section{The \texttt{mathnotes-formula-sheet} document class}
+
+Sometimes, exams will let you take any formula sheet of a given size as
+reference material. The |mathnotes-formula-sheet| document class (based on the
+\ctan{article} class) is optimized for getting as much material as possible in
+that area. A tiny |\maketitle| is provided, as well as a tiny |\section|.
+Theorem titles are highly abbreviated (``Thm'' instead of ``Theorem''). Lists
+are rendered without linebreaks between items. Paragraphs are compressed and the
+page margins are set to a tenth of an inch. The entire document is set in
+|\scriptsize|.
+
+Some additional keys are added to the |\mathnotes| command to customize the
+output:
+
+\begin{keys}
+  \key{columns}[\m{column count}][3]
+    The number of text columns to set the formula sheet in; use 1 to turn off
+    columns.
+
+  \key{balance columns}
+    If set, the unstarred |multicols| environment is used instead of |multicols*|,
+    which attempts to spread material between each of the columns evenly, to
+    make their vertical sizes as even as possible.
+
+    It doesn't look great --- you want to know when you've filled up one column
+    --- so it's off by default.
+
+  \key{width}[\m{width}][8.5in]
+  \key{height}[\m{height}][11in]
+    Set the paper width and height. The 0.1 inch margins are not customizable.
+\end{keys}
 
 \end{document}

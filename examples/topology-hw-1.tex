@@ -1,0 +1,213 @@
+\documentclass[twocolumn, noxcolor, maketitle]{mathnotes-hw}
+\mathnotes{
+  instructor  = Prof.~Ruth Charney ,
+  name        = Rebecca Turner ,
+  email       = rebeccaturner@brandeis.edu ,
+  course      = \textsc{math} 104a (Intro to Topology) ,
+  institution = Brandeis University ,
+  semester    = Spring 2020 ,
+}
+\title{Homework 1}
+\date{2020-01-18}
+\def\T{\mathcal{T}}
+\def\basis{\mathcal{B}}
+\usepackage[
+  letterpaper,
+  margin = 1in,
+]{geometry}
+\raggedbottom
+\begin{document}
+\maketitle
+
+\section{Topological Spaces}
+\subsection{Open Sets and the Definition of a Topology}
+\begin{problem}[1.7]
+  Define a topology on $\R$ (by listing the open sets within it) that contains
+  the open sets $(0,2)$ and $(1,3)$ that contains as few open sets as possible.
+\end{problem}
+$\T = \{ \emptyset, (0,2), (1,3), (1,2), (0,3), \R \}$.
+
+\subsection{Basis for a Topology}
+\begin{problem}[1.10]
+  Show that $\mathcal{B} = \{[a,b) \subset \R : a < b\}$ is a basis for a
+  topology on $\R$.
+\end{problem}
+\begin{enumerate}
+  \item \textbf{$\emptyset \in \T$, $\R \in \T$.} $\emptyset \in \T$ (by the
+    definition of the completion of a basis to a topology).
+
+    Next, we show $\R \in \T$. For all $n \in \Z_{\ge 0}$, $[n-1, n) \in \basis$
+    and $[-n + 1, -n) \in \basis$. We know that if $b_1, b_2 \in \basis$, $b_1
+    \union b_2 \in \T$, so these short intervals can be gathered together (``unionized'')
+    to produce $\R$:
+    \[ \bigunion_{n=1}^{\infty} \left( [n-1, n) \union [-n + 1, -n] \right) = \R, \]
+    so $\R \in \T$.
+
+  \item \textbf{$\T$ contains all finite intersections of elements of $\T$.}
+    Suppose we have two intervals $[a, b)$ and $[c, d)$. Then, we define
+    \begin{alignat*}{1}
+      a' &= \max(a, c) \\
+      b' &= \min(b, d).
+    \end{alignat*}
+    If $a' > b'$, the intersection $[a, b) \inter [c, d) = \emptyset$, which is
+    in $\T$. Otherwise, the intersection is $[a', b')$, which is an element of
+    $\basis$. All elements of the basis are in $\T$, so the intersection of two
+    elements is in the topology.
+
+    Thankfully, the intersection is itself always a basis element, so we can
+    use the same process to show that finite intersections are in $\T$ by
+    induction.
+
+  \item \textbf{Unions of elements of $\T$ are in $\T$.} By the definition of
+    the completion of a basis to a topology, this is true (all unions of basis
+    elements are included in $\T$).
+\end{enumerate}
+
+\begin{problem}[1.12]
+  % See example 1.9 for defn of \R_l
+  Determine which of the following are open sets in $\R_l$. In each case, prove
+  your assertion.
+  \[ A = [4,5)
+    \quad B = \{3\}
+    \quad C = [1,2]
+    \quad D = (7,8) \]
+\end{problem}
+\begin{enumerate}
+  \item $A$ is open in $\R_l$; $[4,5) \in \basis$.
+  \item $B$ is not an open set in $\R_l$; there is no $[a, b) \subset \R$ where
+    both $b > a$ and $|[a, b)| = 1$ (because $[0,1) \cong \R$, i.e.~all
+    intervals contain infinitely many points).
+
+    (Where $\cong$ means ``is isomorphic to.'')
+  \item $C$ is not open in $\R_l$ because the upper bound of an open set in
+    $\R_l$ is never inclusive. There is no set of intervals $[a_1, b_1), \dots$
+    where the union or intersection of the intervals has an inclusive upper bound.
+  \item $D$ is open because we can take
+    \[ D = \lim_{n\to\infty} \left[7 + \frac{1}{n}, 8\right), \]
+    where $[7 + 1/n, 8) \in \basis$ for any $n \in \R$ with $n \ne 0$.
+\end{enumerate}
+
+\pagebreak
+\begin{problem}[1.15]
+  An arithmetic progression in $\Z$ is a set
+  \[ A_{a,b} = \{\dots, a - 2b, a - b, a, a + b, a + 2b, \dots\} \]
+  with $a,b \in \Z$ and $b \ne 0$. Prove that the collection of arithmetic
+  progressions
+  \[ \mathcal{A} = \{ A_{a,b} : a, b \in \Z \text{ and } b \ne 0 \} \]
+  is a basis for a topology on $\Z$. The resulting topology is called the
+  arithmetic progression topology on $\Z$.
+\end{problem}
+
+\begin{proof}
+  \def\Ar#1#2{A_{#1,#2}}
+  \def\Ars{\mathcal{A}}
+  Let us describe the \emph{minimal form} of an arithmetic progression $\Ar ab$
+  to be the progression $\Ar{a'}{b'} = \Ar ab$ with $a', b' > 0$ and the
+  smallest possible $a'$; in particular, that $a' < b'$.
+
+  We can obtain the minimal form of the progression like so:
+  \begin{alignat*}{1}
+    a' &= a \bmod b \\
+    b' &= |b|, \\
+    \Ar{a'}{b'} &= \Ar ab.
+  \end{alignat*}
+
+  \begin{remark}
+    Two arithmetic progressions have the same elements if their minimal forms are
+    the same; this give an equivalence relation on $\Ars$.
+  \end{remark}
+
+  Now, suppose we have two arithmetic progressions $\Ar ab$ and $\Ar cd$. We
+  assume that the progressions are in minimal form without loss of generality. We
+  also assume that $b \le d$ (by swapping $(a,b)$ with $(c,d)$ if necessary),
+  again without loss of generality.
+
+  If $b \mid d$ and $a = c$, we have $\Ar ab \subset \Ar cd$. In particular, $\Ar
+  ab \inter \Ar cd = \Ar cd$.
+
+  If $b \mid d$ and $a \ne c$, we have $\Ar ab \inter \Ar cd = \emptyset$.
+
+  If $b \nmid d$, we have a different progression. An intersection is generated by
+  an index $(n_1, n_2)$, where
+  \begin{alignat*}{1}
+    a + b n_1 &= c + d n_2. \\
+    \intertext{We can then solve for $n_1$:}
+    t(n) &= c - a + dn \\
+    n_1 &= \frac{t(n_2)}{b}. \\
+    \intertext{Next, we have an infinite \emph{set} of possibilities for $n_2$:}
+    n_2 &\in \left\{n \in \Z : t(n) \mid b \right\}.
+    \intertext{Sorting the possible values of $n_2$ by absolute value, let us call
+      the smallest two values $i_1$ and $i_2$. Then, the difference between
+      adjacent elements in the intersection progression $\Ar ab \inter \Ar cd$
+      is $i_2 - i_1$.
+      \endgraf
+      Let}
+    a' &= a + bi_1 \\
+    b' &= i_2 - i_1 \\
+    \Ar ab \inter \Ar cd &= \Ar{a'}{b'}.
+  \end{alignat*}
+  This isn't super rigorous, admittedly (we're missing some inductive reasoning
+  about the integers to prove that there are an infinite set of valid values of
+  $n_2$, in particular), but I have some fairly convincing Haskell code. And the
+  missing steps are mostly boilerplate, and it's late at night already\dots
+
+  In all cases, the intersection of two arithmetic progressions is either empty or
+  another arithmetic progression (i.e.~either the empty set or another basis
+  element), so the same argument given above for $\R_l$ holds (namely that we can
+  extend this to all finite intersections of elements of $\Ars$ inductively).
+
+  Therefore, finite intersections are in the basis. Unions are in the completion
+  of the basis (again by definition). The special element $\emptyset$ is in the
+  completion (by definition), and $\Z = \Ar01$, so $\Z \in \basis$. Therefore,
+  $\Ars$ forms the basis of a topology on $\Z$.
+\end{proof}
+
+\pagebreak
+\subsection{Closed Sets}
+\begin{problem}[1.27(a)]
+  The infinite comb $C$ is the subset of the plane illustrated in Figure~1.17
+  and defined by
+  \begin{multline*}
+    C = \{(x,0) : 0 \le x \le 1\} \;\union \\
+    \bigg\{ \left( \frac{1}{2^n}, y \right) : n = 0,1,2, \dots \\
+      \text{ and } 0 \le y \le 1 \bigg\}.   
+  \end{multline*}
+  Prove that $C$ is not closed in the standard topology on $\R^2$.
+\end{problem}
+\begin{proof}
+  Suppose $C$ is closed in the standard topology on $\R^2$. Then, its complement
+  $C^c = \R^2 \setminus C$ must be an open set.
+
+  The point $(0, 1)$ is not in $C$, so $(0, 1) \in C^c$. Every open ball in $\R^2$
+  containing $(0, 1)$ also contains a smaller open ball centered about $(0, 1)$.
+  (For example, the open ball about $(-1, 1)$ of radius $1.1$ contains the open
+  ball centered about $(0, 1)$ of radius $0.1$.)
+
+  However, every open ball centered about $(0, 1)$ contains infinitely many
+  points of $C$; if the ball has radius $r$, all the comb's ``tines'' at $x =
+  1/2^n$ for $n > - \log_2 r$ intersect with the ball.
+
+  Therefore, every open ball containing $(0, 1)$ also contains points in $C$. As
+  a result, $C^c$ is not open, which contradicts our assumption. Therefore, $C$
+  is not closed.
+\end{proof}
+
+\begin{problem}[1.32]
+  Prove that intervals of the form $[a, b)$ are closed in the lower limit
+  topology on $\R$.
+\end{problem}
+\begin{proof}
+  Take some interval $[a, b)$. Its complement is given by $(-\infty, a) \union
+  [b, \infty)$. Given that
+  \begin{alignat*}{1}
+    (-\infty, a) &= \bigunion_{n=1}^\infty [a-n, a) \\
+    [b, \infty) &= \bigunion_{n=1}^\infty [b, b+n),
+  \end{alignat*}
+  the complement of $[a, b)$ is the union of a number of lower-limit intervals
+  in $\R$, i.e.~the basis elements. The basis elements and its unions are open
+  sets, so the complement of $[a, b)$ is an open set. Then, by the definition of
+  a closed set, $[a, b)$ is closed in $\R_l$.
+\end{proof}
+
+
+\end{document}
