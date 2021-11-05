@@ -7,7 +7,6 @@
 
 % Load some utility packages.
 \RequirePackage{xparse}  % Better command declarations.
-% \RequirePackage{etoolbox}  % Robust command declarations.
 \RequirePackage{xkeyval}  % Better keyval parsing.
 % {{{ Package options
 \RequirePackage{kvoptions}  % More flexible package options.
@@ -92,7 +91,10 @@
       }
       {
         % Otherwise, load non-XeTeX fallbacks.
-        \RequirePackage[upint]{stix2}
+        \bool_if:NT \g__mn_stix_bool
+          {
+            \RequirePackage[upint]{stix2}
+          }
         \RequirePackage{amsmath}[2013/01/14]
       }
   }
@@ -100,8 +102,6 @@
     % No fonts
     \RequirePackage{amsmath}[2013/01/14]
   } % }}}
-
-\RequirePackage[thmmarks, amsmath, amsthm]{ntheorem}
 
 \bool_if:NT \g__mn_symbols_bool % {{{ Define math symbol commands
   {
@@ -219,9 +219,12 @@
     \ProvideDocumentCommand \surjection {}{\twoheadrightarrow}
     \ProvideDocumentCommand \surj {}{\twoheadrightarrow}
     % Bijective function.
+    \ProvideDocumentCommand \bijection {}{\twoheadrightarrowtail}
     \ProvideDocumentCommand \bijective {}{\twoheadrightarrowtail}
     \ProvideDocumentCommand \bij {}{\twoheadrightarrowtail}
     % Function restriction.
+    \cs_if_free:NT \restriction
+      { \DeclareMathOperator \restriction {|} }
     \ProvideDocumentCommand \restr {}{\restriction}
 
     % d/dx
@@ -284,7 +287,7 @@
       }
   } % }}}
 
-\mn__if_package_loaded:nT { listings } % {{{ Better default styles
+\bool_if:NT \g__mn_listings_bool % {{{ Better default styles
   {
     \RequirePackage { xcolor }
     \lstset
@@ -381,214 +384,215 @@
   }
 % }}}
 
-% {{{ \author, \title, \maketitle, \thanks, etc.
-\bool_new:N \g__mn_author_set
-\cs_set:Npn \author #1
+\bool_if:NT \g__mn_maketitle_bool % {{{ \author, \title, \maketitle, \thanks, etc.
   {
-    \bool_gset_true:N \g__mn_author_set
-    \cs_gset:Npn \@author { #1 }
-  }
-
-\bool_new:N \g__mn_title_set
-\cs_set:Npn \title #1
-  {
-    \bool_gset_true:N \g__mn_title_set
-    \cs_gset:Npn \@title { #1 }
-  }
-
-\prg_new_conditional:Npnn \mn__if_should_make_thanks: % {{{
-  { T, }
-  {
-    \bool_if:NTF \g__mn_should_make_thanks
+    \bool_new:N \g__mn_author_set
+    \cs_set:Npn \author #1
       {
-        \bool_lazy_all:nTF
+        \bool_gset_true:N \g__mn_author_set
+        \cs_gset:Npn \@author { #1 }
+      }
+
+    \bool_new:N \g__mn_title_set
+    \cs_set:Npn \title #1
+      {
+        \bool_gset_true:N \g__mn_title_set
+        \cs_gset:Npn \@title { #1 }
+      }
+
+    \prg_new_conditional:Npnn \mn__if_should_make_thanks: % {{{
+      { T, }
+      {
+        \bool_if:NTF \g__mn_should_make_thanks
           {
-            { \tl_if_empty_p:N \g__mn_email_tl }
-            { \tl_if_empty_p:N \g__mn_course_tl }
-            { \tl_if_empty_p:N \g__mn_instructor_tl }
-            { \tl_if_empty_p:N \g__mn_institution_tl }
-            { \tl_if_empty_p:N \g__mn_semester_tl }
+            \bool_lazy_all:nTF
+              {
+                { \tl_if_empty_p:N \g__mn_email_tl }
+                { \tl_if_empty_p:N \g__mn_course_tl }
+                { \tl_if_empty_p:N \g__mn_instructor_tl }
+                { \tl_if_empty_p:N \g__mn_institution_tl }
+                { \tl_if_empty_p:N \g__mn_semester_tl }
+              }
+              { \prg_return_false: }
+              { \prg_return_true: }
           }
           { \prg_return_false: }
-          { \prg_return_true: }
-      }
-      { \prg_return_false: }
-  } % }}}
+      } % }}}
 
-\cs_set:Npn \mn__make_thanks_text % {{{
-  {
-    \tl_if_empty:NF \g__mn_email_tl
+    \cs_set:Npn \mn__make_thanks_text % {{{
       {
-        \email { \tl_use:N { \g__mn_email_tl } }
-        \bool_lazy_all:nF
+        \tl_if_empty:NF \g__mn_email_tl
           {
-            { \tl_if_empty_p:N \g__mn_course_tl }
-            { \tl_if_empty_p:N \g__mn_instructor_tl }
-            { \tl_if_empty_p:N \g__mn_institution_tl }
-            { \tl_if_empty_p:N \g__mn_semester_tl }
+            \email { \tl_use:N { \g__mn_email_tl } }
+            \bool_lazy_all:nF
+              {
+                { \tl_if_empty_p:N \g__mn_course_tl }
+                { \tl_if_empty_p:N \g__mn_instructor_tl }
+                { \tl_if_empty_p:N \g__mn_institution_tl }
+                { \tl_if_empty_p:N \g__mn_semester_tl }
+              }
+              { ;~ }
           }
-          { ;~ }
-      }
-    \tl_if_empty:NF \g__mn_course_tl
-      {
-        \tl_use:N \g__mn_course_tl
-        \bool_lazy_all:nF
+        \tl_if_empty:NF \g__mn_course_tl
           {
-            { \tl_if_empty_p:N \g__mn_instructor_tl }
-            { \tl_if_empty_p:N \g__mn_institution_tl }
-            { \tl_if_empty_p:N \g__mn_semester_tl }
+            \tl_use:N \g__mn_course_tl
+            \bool_lazy_all:nF
+              {
+                { \tl_if_empty_p:N \g__mn_instructor_tl }
+                { \tl_if_empty_p:N \g__mn_institution_tl }
+                { \tl_if_empty_p:N \g__mn_semester_tl }
+              }
+              { ~ }
           }
-          { ~ }
-      }
-    \tl_if_empty:NF \g__mn_instructor_tl
-      {
-        \bool_lazy_all:nTF
+        \tl_if_empty:NF \g__mn_instructor_tl
           {
-            { \tl_if_empty_p:N \g__mn_email_tl }
-            { \tl_if_empty_p:N \g__mn_course_tl }
+            \bool_lazy_all:nTF
+              {
+                { \tl_if_empty_p:N \g__mn_email_tl }
+                { \tl_if_empty_p:N \g__mn_course_tl }
+              }
+              { Taught~by~ }
+              { taught~by~ }
+            \tl_use:N \g__mn_instructor_tl
           }
-          { Taught~by~ }
-          { taught~by~ }
-        \tl_use:N \g__mn_instructor_tl
-      }
-    \tl_if_empty:NF \g__mn_institution_tl
-      {
-        \bool_lazy_all:nTF
+        \tl_if_empty:NF \g__mn_institution_tl
           {
-            { \tl_if_empty_p:N \g__mn_email_tl }
-            { \tl_if_empty_p:N \g__mn_course_tl }
-            { \tl_if_empty_p:N \g__mn_instructor_tl }
+            \bool_lazy_all:nTF
+              {
+                { \tl_if_empty_p:N \g__mn_email_tl }
+                { \tl_if_empty_p:N \g__mn_course_tl }
+                { \tl_if_empty_p:N \g__mn_instructor_tl }
+              }
+              { At~ }
+              { ~at~ }
+            \tl_use:N \g__mn_institution_tl
           }
-          { At~ }
-          { ~at~ }
-        \tl_use:N \g__mn_institution_tl
-      }
-    \tl_if_empty:NF \g__mn_semester_tl
-      {
-        \bool_lazy_all:nF
+        \tl_if_empty:NF \g__mn_semester_tl
           {
-            { \tl_if_empty_p:N \g__mn_email_tl }
-            { \tl_if_empty_p:N \g__mn_course_tl }
-            { \tl_if_empty_p:N \g__mn_instructor_tl }
-            { \tl_if_empty_p:N \g__mn_institution_tl }
+            \bool_lazy_all:nF
+              {
+                { \tl_if_empty_p:N \g__mn_email_tl }
+                { \tl_if_empty_p:N \g__mn_course_tl }
+                { \tl_if_empty_p:N \g__mn_instructor_tl }
+                { \tl_if_empty_p:N \g__mn_institution_tl }
+              }
+              { ,~ }
+            \tl_use:N \g__mn_semester_tl
           }
-          { ,~ }
-        \tl_use:N \g__mn_semester_tl
-      }
-    .
-  } % }}}
+        .
+      } % }}}
 
-\cs_set:Npn \@author % {{{
-  {
-    % If the author hasn't been set, we provide this (complicated, PITA)
-    % default; however, if we don't have any information to put in it, we
-    % still give a warning.
-    \tl_if_eq:NNTF \g__mn_name_tl \c_novalue_tl
+    \cs_set:Npn \@author % {{{
       {
-        \msg_warning:nn { mathnotes } { no name }
-      }
-      {
-        \tl_use:N \g__mn_name_tl
-        % Do we have any information to put in a \thanks?
-        \mn__if_should_make_thanks:T
+        % If the author hasn't been set, we provide this (complicated, PITA)
+        % default; however, if we don't have any information to put in it, we
+        % still give a warning.
+        \tl_if_eq:NNTF \g__mn_name_tl \c_novalue_tl
           {
-            \thanks { \mn__make_thanks_text }
+            \msg_warning:nn { mathnotes } { no name }
           }
-      }
-  } % }}}
+          {
+            \tl_use:N \g__mn_name_tl
+            % Do we have any information to put in a \thanks?
+            \mn__if_should_make_thanks:T
+              {
+                \thanks { \mn__make_thanks_text }
+              }
+          }
+      } % }}}
 
-% {{{ \@maketitle and \maketitle
-\skip_const:Nn \g__mn_maketitle_after_title { 1em }
-\skip_const:Nn \g__mn_maketitle_after_author { 0.5em }
-\skip_const:Nn \g__mn_maketitle_after { 1.5em }
+    % {{{ \@maketitle and \maketitle
+    \skip_const:Nn \g__mn_maketitle_after_title { 1em }
+    \skip_const:Nn \g__mn_maketitle_after_author { 0.5em }
+    \skip_const:Nn \g__mn_maketitle_after { 1.5em }
 
-\RenewDocumentCommand \@maketitle {}
-  {
-    \begin{center}
-      \let \footnote \thanks
+    \RenewDocumentCommand \@maketitle {}
+      {
+        \begin{center}
+          \let \footnote \thanks
 
-      % Set the title, if it exists.
-      \bool_if:NT \g__mn_title_set
-        {
+          % Set the title, if it exists.
+          \bool_if:NT \g__mn_title_set
+            {
+              \group_begin:
+              \HUGE
+              \bfseries
+              \@title
+              \par
+              \group_end:
+            }
+          \skip_vertical:N \g__mn_maketitle_after_title
+
+          % Set the author.
           \group_begin:
-          \HUGE
-          \bfseries
-          \@title
+          \LARGE
+          \lineskip 0.5em
+          \begin{tabular}[t]{c}
+            \@author
+          \end{tabular}
           \par
           \group_end:
-        }
-      \skip_vertical:N \g__mn_maketitle_after_title
+          \skip_vertical:N \g__mn_maketitle_after_author
 
-      % Set the author.
-      \group_begin:
-      \LARGE
-      \lineskip 0.5em
-      \begin{tabular}[t]{c}
-        \@author
-      \end{tabular}
-      \par
-      \group_end:
-      \skip_vertical:N \g__mn_maketitle_after_author
+          % Set the date.
+          \large
+          \@date
 
-      % Set the date.
-      \large
-      \@date
+        \end{center}
+        \par
+        \skip_vertical:N \g__mn_maketitle_after
+      }
 
-    \end{center}
-    \par
-    \skip_vertical:N \g__mn_maketitle_after
-  }
-
-\RenewDocumentCommand \maketitle {}
-  {
-    \par
-    \group_begin:
-      \cs_set:Npn \thefootnote
-        {
-          \@fnsymbol
-          \c@footnote
-        }
-      \cs_set:Npn \@makefnmark
-        {
-          \rlap
+    \RenewDocumentCommand \maketitle {}
+      {
+        \par
+        \group_begin:
+          \cs_set:Npn \thefootnote
             {
-              \@textsuperscript { \normalfont \@thefnmark }
+              \@fnsymbol
+              \c@footnote
             }
-        }
-      \cs_set:Npn \@makefntext ##1
-        {
-          \parindent 1em
-          \noindent
-          \hbox_to_wd:nn
-            { 1.8em }
+          \cs_set:Npn \@makefnmark
             {
-              \hss
-              \@textsuperscript { \normalfont \@thefnmark }
+              \rlap
+                {
+                  \@textsuperscript { \normalfont \@thefnmark }
+                }
             }
-          ##1
-        }
-      \legacy_if:nTF { @twocolumn }
-        {
-          \if_int_compare:w \col@number = \@ne
-            \@maketitle
-          \else:
-            \twocolumn [ \@maketitle ]
-          \fi:
-        }
-        {
-          \newpage
-          \global\@topnum\z@
-          \@maketitle
-        }
-      \thispagestyle{empty}
-      \@thanks
-    \group_end:
-    \setcounter{footnote}{0}
-    \cs_set:Npn \thanks ##1 { }
-    % NOTE: we don't erase the definitions of \@title, etc.
-  }
-% }}} \@maketitle and \maketitle
-% }}}
+          \cs_set:Npn \@makefntext ##1
+            {
+              \parindent 1em
+              \noindent
+              \hbox_to_wd:nn
+                { 1.8em }
+                {
+                  \hss
+                  \@textsuperscript { \normalfont \@thefnmark }
+                }
+              ##1
+            }
+          \legacy_if:nTF { @twocolumn }
+            {
+              \if_int_compare:w \col@number = \@ne
+                \@maketitle
+              \else:
+                \twocolumn [ \@maketitle ]
+              \fi:
+            }
+            {
+              \newpage
+              \global\@topnum\z@
+              \@maketitle
+            }
+          \thispagestyle{empty}
+          \@thanks
+        \group_end:
+        \setcounter{footnote}{0}
+        \cs_set:Npn \thanks ##1 { }
+        % NOTE: we don't erase the definitions of \@title, etc.
+      }
+    % }}} \@maketitle and \maketitle
+  } % }}}
 
 \bool_if:NT \g__mn_kindle_bool % {{{
   {
@@ -639,6 +643,8 @@
 
 \bool_if:NT \g__mn_theorems_bool % {{{ mdtheorem setup
   {
+    \RequirePackage[thmmarks, amsmath, amsthm]{ntheorem}
+
     \RequirePackage{mdframed}
 
     \mdfdefinestyle { theorem }
@@ -847,10 +853,9 @@
     % \titlespacing* { \subsubsection } { 0em } { 1em } { 0em } [ 0em ]
   % } % }}}
 
-\RequirePackage[hidelinks]{hyperref}
-
 \bool_if:NT \g__mn_xcolor_bool % {{{
   {
+    \RequirePackage[hidelinks]{hyperref}
     \hypersetup
       {
         colorlinks = true ,
@@ -1067,6 +1072,7 @@
 \setlength { \parindent } { 0em }
 \setlength { \parskip }   { 1em }
 % {{{ Set \parskip=0 around \tableofcontents
+\RequirePackage{etoolbox}
 \pretocmd { \tableofcontents }
   {
     \group_begin:

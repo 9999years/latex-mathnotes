@@ -1,0 +1,194 @@
+\documentclass{mathnotes-formula-sheet}
+\usepackage{nicefrac}
+\ExplSyntaxOn
+\NewDocumentCommand \normalized { m }
+  { \frac { #1 } { \| #1 \| } }
+\let \gr \grad
+\def \ddx { \frac{d}{dx} }
+% VL = vector literal
+\NewDocumentCommand \vl { m } { \left\langle #1 \right\rangle }
+\ExplSyntaxOff
+
+\title{Formula Sheet}
+\author{Rebecca Turner}
+\date{2019-11-12}
+
+% "The most common size for index cards in North America and UK is 3 by 5
+% inches (76.2 by 127.0 mm), hence the common name 3-by-5 card. Other sizes
+% widely available include 4 by 6 inches (101.6 by 152.4 mm), 5 by 8 inches
+% (127.0 by 203.2 mm) and ISO-size A7 (74 by 105 mm or 2.9 by 4.1 in)."
+\mathnotes{
+  height = 4in ,
+  width = 6in ,
+}
+\begin{document}
+\maketitle
+\begin{gather*}
+% 12.2: Vectors
+% 12.3: Dot product
+  \textstyle\vec a \cdot \vec b = \sum_i a_i b_i = |\vec a| |\vec b| \cos \theta. \\
+% 12.4: Cross product
+  \vec a \times \vec b
+  % = \left| \begin{array}{rrr}
+    % \hat{i} & \hat{j} & \hat{k} \\
+    % a_1 & a_2 & a_3 \\
+    % b_1 & b_2 & b_3 \\
+  % \end{array} \right| \\
+  = \langle a_2 b_3 - a_3 b_2,
+    \quad a_3b_1 - a_1b_3, \\
+    a_1b_2 - a_2b_1 \rangle.\quad
+  |\vec a \times \vec b| = |\vec a| |\vec b| \sin \theta.
+% 12.5: Equations of lines and planes.
+\shortintertext{Param.\ eqns.\ of line through $\langle x_0,y_0,z_0 \rangle$
+par.\ to $\langle a,b,c \rangle$:}
+  x = x_0 + at,
+  \quad y = y_0 + bt,
+  \quad z = z_0 + ct. \\
+\text{Symm.\ eqns.: }
+  \frac{x-x_0}{a}
+  = \frac{y-y_0}{b}
+  = \frac{z-z_0}{c}. \\
+\shortintertext{Vec.\ eqn.\ of plane through $\vec r$ with $\vec n$ normal:}
+  \vec n \cdot (\vec r - \vec r_0) = 0,
+  \quad \vec n \cdot \vec r = \vec n \cdot \vec r_0. \\
+% 13.1: Vector functions
+% 13.2: Derivatives/integrals of vector functions
+% 13.3: Arc length and curvature
+\shortintertext{Length along a vec.\ fn.\ $\vec r(t)$:}
+  \textstyle\int_a^b \left|\vec r'(t)\right|\,dt = \int_a^b \sqrt{\sum_i
+  r_i'(t)^2}\,dt, \\
+\shortintertext{Unit tang.\ $\vec T(t) = \vec r'(t)/\left|\vec
+r'(t)\right|$, so curvature of $\vec r(t)$ w/r/t the arc len.\ fn. $s$:}
+  \kappa = \left|\frac{d\vec T}{ds}\right|
+  = \frac{\left| \vec T'(t) \right|}{\left| \vec r'(t) \right|}
+  = \frac{\left| \vec r'(t) \times \vec r''(t) \right|}{\left| \vec r'(t)
+  \right|^3}. \\
+\text{Unit normal:}\quad
+  \vec N(t) = \vec T'(t)\,/\,\left| \vec T'(t) \right| \\
+% 14.1: Functions of several variables
+% 14.2: Limits and continuity
+% 14.3: Partial derivatives
+\text{Clairaut's thm.:}\quad
+  f_{xy}(a,b) = f_{yx}(a,b) \\
+% 14.4: Tangent planes & linear approximations
+\shortintertext{Tan.\ plane to $z = f(x,y)$ at $\langle x_0, y_0,
+z_0\rangle$:}
+  z - z_0 = f_x(x_0, y_0) (x-x_0) \\
+    + f_y(x_0, y_0) (y-y_0). \\
+% Partial derivatives of f for each variable exist near a point and are
+% continuous => f is differentiable at the po\int.
+% 14.6: Directional derivatives and the gradient vector
+\text{Grad.:}\quad
+  \grad f(x,y) = \pd[f]x \hat{i} + \pd[f]y \hat{j}. \\
+\shortintertext{Dir.\ deriv.\ towards $\vec u$ at $\langle x_0, y_0 \rangle$:}
+  D_{\langle a,b\rangle} f(x_0, y_0) = f_x(x,y) a + f_y(x,y) b \\
+  = \grad f(x,y) \cdot \vec u. \\
+\shortintertext{Max of $D_{\vec u} f(\vec x) = \left|\grad f(\vec
+x)\right|$. Tan.\ plane of $f$ at $\vec p$:}
+  0 =
+  f_x(\vec p)(x-\vec p_x)
+  + f_y(\vec p)(y-\vec p_y) \\
+  + f_z(\vec p)(z-\vec p_z).
+% 14.7: Maximum and minimum values
+\shortintertext{If $f$ has loc.\ extrem.\ at $\vec p$, then $f_x(\vec p) =
+0$ (\& $f_y$, etc). If so, let}
+  D = \left| \begin{array}{ll}
+    f_{xx} & f_{xy} \\
+    f_{yx} & f_{yy}
+  \end{array}\right|
+  = f_{xx} f_{yy} - (f_{xy})^2.
+\shortintertext{%
+  $D = 0$: no information.
+  $D < 0$: saddle pt.
+  $D > 0$: $f_{xx}(\vec p) > 0 \implies$ loc.\ min;
+  $f_{xx}(\vec p) < 0 \implies$ loc.\ max.
+  ($D$ is the \textbf{Hessian mat.})
+\endgraf
+  Set of possible abs. min and max vals of $f$ in reg.\ $D$: $f$ at critical
+  pts.\ and extreme vals.\ on the boundary of $D$.
+% 14.8: Lagrange multipliers
+\endgraf
+  Lagrange mults.: extreme vals of $f(\vec p)$ when $g(\vec p) = k$.
+  Find all $\vec x, \lambda$ s.t.
+}
+  \grad f(\vec x) = \lambda \grad g(\vec x),\quad g(\vec x) = k.
+\shortintertext{i.e.\ $f_x = \lambda g_x$, etc.}
+% 15.1: Double integrals over rectangles
+% 15.2: Iterated integrals
+% 15.3: Double integrals over general regions
+  \iint f(r\cos\theta, r\sin\theta)r\,dr\,d\theta. \\
+  A = \iint_D \left(\sqrt{f_x(x,y)^2 + f_y(x,y)^2 + 1}\right) \,dA. \\
+\shortintertext{Line int.s}
+  \int_C f(x,y)\,ds = \\
+    \int_a^b f(x(t), y(t))\sqrt{\left(\pd[x]t\right)^2 + \left(\pd[y]t\right)^2}\,dt \\
+\shortintertext{If $C$ is a smooth curve given by $\vec r(t)$ from $a \le t
+\le b$,}
+  \int_C \grad f \cdot d\vec r = f(\vec r(b)) - f(\vec r(a)) \\
+\text{Spherical coords:}\quad
+  x = \rho \sin \phi \cos \theta \\
+  y = \rho \sin \phi \sin \theta, z = \rho \cos \phi \\
+  \curl \vec F = \\ \left< \pd[R]y - \pd[Q]z, \pd[P]z - \pd[R]x, \pd[Q]x -
+  \pd[P]y\right>. \\
+  \vec F = \langle P,Q,R \rangle,\quad
+  \curl \vec F = \grad \times \vec F \\
+  \vec F \text{ ``conservative''} \implies \exists f, \vec F = \grad f. \\
+  \dive \vec F = \grad \cdot \vec F = \pd[P]x + \pd[Q]y + \pd[R]z. \\
+  \curl(\grad f) = \vec 0,\quad \dive \curl \vec F = 0 \\
+\shortintertext{If $C$ is a positively-oriented (ccw) closed curve, $D$
+is bounded by $C$, and $\vec n$ represents the normal,}
+  % \int_C P\,dx + Q\,dy = \iint_D\left( \pd[Q]{x} - \pd[P]{y} \right). \\
+  \oint_C \vec F \cdot \vec n\,ds = \iint_D \dive \vec F(x,y)\,dA.
+\end{gather*}
+
+\pagebreak
+\raggedright Common derivs:
+$f(g(x)) \to g'(x) f'(g(x))$,
+$b^x \to b^x \ln b$,
+$f^{-1}(x) \to 1/f'(f^{-1}(x))$,
+$\ln x \to 1/x$,
+$\sin x \to \cos x$, $\cos x \to -\sin x$,
+$\tan x \to \sec^2 x$,
+$\sin^{-1} x \to 1/\sqrt{1-x^2}$,
+$\cos^{-1} x \to -(\sin^{-1}x)'$ (etc.),
+$\tan^{-1} x \to 1/(1+x^2)$,
+$\sec^{-1} x \to 1/(|x|\sqrt{x^2-1})$.
+
+Common ints (don't forget $+C$):
+\begin{gather*}
+  x^n \to \frac{x^{n + 1}}{n + 1} + C \quad \text{when } n \ne -1 \\
+  1/x \to \ln |x| \\
+  \tan x \to -\ln(\cos x) \\
+  \int uv'\,dx = uv - \int u'v\,dx \quad\text{(Int.\ by parts)} \\
+  \int u\,dv = uv-\int v\,du \\
+  \int_{g(a)}^{g(b)} f(u)\,du = \int_a^b f(g(x))g'(x)\,dx
+  \quad\text{$u$-substitution.}
+\intertext{E.x.\ in $\int 2x \cos x^2\,dx$, let $u=x^2$, find $du/dx=2x
+\implies du = 2x\,dx$, subs.\ $\int \cos u\,du = \sin u + C = \sin x^2 +
+C$.}
+  \iint_R f(x,y)\,dA = \int_\alpha^\beta \int_a^b f(r\cos\theta,
+  r\sin\theta)r\,dr\,d\theta
+\end{gather*}
+\begin{itemize}
+  \item Integrand contains $a^2-x^2$, let $x = a\sin\theta$ and use $1 -
+  \sin^2 \theta = \cos^2 \theta$.
+  \item $a^2 + x^2$, let $x = a\tan\theta$, use $1 + \tan^2 \theta = \sec^2
+  \theta$.
+  \item $x^2 - a^2$, let $x = a\sec\theta$, use $\sec^2\theta - 1 = \tan^2
+  \theta$.
+\end{itemize}
+
+\begin{gather*}
+  \lim_{x \to 0} \sin x/x = 1 \\
+  \lim_{x \to 0} (1-\cos x)/x = 0 \\
+  \lim_{x \to \infty} x \sin(1/x) = 1 \\
+  \lim_{x \to 0} (1+x)^{1/x} = e \\
+  \lim_{x \to 0} (e^{ax}-1)/(bx) = a/b \\
+  \lim_{x \to 0^+} x^x = 1 \\
+  \lim_{x \to 0^+} x^{-n} = \infty \\
+  \text{For $0/0$ or $\pm\infty/\infty$,}\quad
+  \lim_{x \to c} f(x)/g(x) = \lim_{x \to c} f'(x)/g'(x) \\
+  \text{For $g(x)$ cont.\ at $L$,}
+  \lim_{x \to c} f(x) = L \implies \lim_{x \to c} g(L)
+\end{gather*}
+
+\end{document}

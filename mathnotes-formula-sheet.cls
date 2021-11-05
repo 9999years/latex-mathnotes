@@ -113,3 +113,5 @@
   {
     nosep
   }
+
+\def\section#1{\hrulefill\\\textbf{#1}\\}
