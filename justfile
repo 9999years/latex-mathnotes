@@ -22,6 +22,7 @@ dist_files := "\
 	rbt-mathnotes-messages.sty \
 	rbt-mathnotes-hw.cls \
 	rbt-mathnotes-formula-sheet.cls \
+	README.md \
 	LICENSE.txt \
 	examples \
 "
