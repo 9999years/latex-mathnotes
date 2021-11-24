@@ -1,11 +1,11 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplClass{mathnotes-formula-sheet}{${DATE}$}{${VERSION}$}{Styles for mathematical
-  exam formula sheets.}
+\ProvidesExplClass{rbt-mathnotes-formula-sheet}{${DATE}$}{${VERSION}$}{Styles
+  for mathematical exam formula sheets.}
 
 \LoadClass{article}
 
-\RequirePackage{mathnotes}
+\RequirePackage{rbt-mathnotes}
 
 \cs_set:Npn \@maketitle
   {

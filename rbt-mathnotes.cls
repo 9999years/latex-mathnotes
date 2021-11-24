@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplClass{mathnotes}{${DATE}$}{${VERSION}$}{Styles for mathematical
+\ProvidesExplClass{rbt-mathnotes}{${DATE}$}{${VERSION}$}{Styles for mathematical
   note taking.}
 
 \PassOptionsToClass { openany, oneside } { memoir }
@@ -24,7 +24,7 @@
       { }
   }
 
-\makechapterstyle { mathnotes }
+\makechapterstyle { rbt-mathnotes }
   {
     % allow for 99 chapters!
     \settowidth{\chapindent}{\chapnumfont 999}
@@ -62,9 +62,9 @@
       }
   }
 
-\makeheadstyles { mathnotes }
+\makeheadstyles { rbt-mathnotes }
   {
-    \chapterstyle { mathnotes }
+    \chapterstyle { rbt-mathnotes }
 
     \setsecnumformat
       {
@@ -157,7 +157,7 @@
       }
   }
 
-\headstyles { mathnotes }
+\headstyles { rbt-mathnotes }
 
 % \chapterstyle{hangnum}
 % \cs_set:Npn \chapnumfont
@@ -166,4 +166,4 @@
     % \exp:w \mn__color:n {MNsecnum}
   % }
 
-\RequirePackage{mathnotes}
+\RequirePackage { rbt-mathnotes }

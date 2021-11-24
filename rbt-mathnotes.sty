@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplPackage{mathnotes}{${DATE}$}{${VERSION}$}{Styles for mathematical
-  note taking.}
+\ProvidesExplPackage{rbt-mathnotes}{${DATE}$}{${VERSION}$}{Styles for
+  mathematical note taking.}
 \errorcontextlines 20
 % Module 'mn'
 
@@ -10,7 +10,7 @@
 \RequirePackage{xkeyval}  % Better keyval parsing.
 % {{{ Package options
 \RequirePackage{kvoptions}  % More flexible package options.
-\RequirePackage{mathnotes-util}
+\RequirePackage{rbt-mathnotes-util}
 
 \SetupKeyvalOptions
   {
@@ -35,7 +35,7 @@
 
 \mn__process_options:n { mn__package_options } % }}}
 
-\RequirePackage{mathnotes-messages}
+\RequirePackage{rbt-mathnotes-messages}
 
 % {{{ Load fonts.
 % Check if we can load fontspec; this is taken from fontspec.sty.

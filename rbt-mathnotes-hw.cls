@@ -1,18 +1,18 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplClass{mathnotes-hw}{${DATE}$}{${VERSION}$}{Companion styles
-  to mathnotes for typeset homework assignments.}
+\ProvidesExplClass{rbt-mathnotes-hw}{${DATE}$}{${VERSION}$}{Companion styles
+  to rbt-mathnotes for typeset homework assignments.}
 
-% \PassOptionsToPackage{noxcolor}{mathnotes}
+% \PassOptionsToPackage{noxcolor}{rbt-mathnotes}
 
 \RequirePackage{kvoptions}
 \DeclareDefaultOption
   {
-    \PassOptionsToClass { \CurrentOption } { mathnotes }
+    \PassOptionsToClass { \CurrentOption } { rbt-mathnotes }
   }
 \ProcessKeyvalOptions*
 
-\LoadClass{mathnotes}
+\LoadClass { rbt-mathnotes }
 
 \cs_set:Npn \mn__undefine_thm:n #1
   {
@@ -258,10 +258,10 @@
     \clist_map_function:nN { #1 } \mn__add_par_arg_to_sectioning_cmd:N
   }
 
-\makeheadstyles { mathnotes-hw }
+\makeheadstyles { rbt-mathnotes-hw }
   {
-    \chapterstyle { mathnotes }
-    \headstyles { mathnotes }
+    \chapterstyle { rbt-mathnotes }
+    \headstyles { rbt-mathnotes }
 
     % Don't use chapter numbers in sections and beyond:
     \cs_set:Npn \thesection { \arabic{section} }
@@ -278,7 +278,7 @@
       }
   }
 
-\headstyles { mathnotes-hw }
+\headstyles { rbt-mathnotes-hw }
 
 \setlength{\columnsep}{3em}
 

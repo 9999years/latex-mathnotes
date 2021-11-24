@@ -4,7 +4,7 @@
 \usepackage{longtable}
 \usepackage{changepage}
 \usepackage{metalogo}
-\newcommand{\mn}{\ctan{mathnotes}}
+\newcommand{\mn}{\ctan{rbt-mathnotes}}
 
 \makeatletter
 \renewcommand{\SX@explpreset}{
@@ -22,7 +22,7 @@
   noxcolor,
   noenumitem,
   notheorems,
-]{mathnotes}
+]{rbt-mathnotes}
 
 \usepackage{FiraSans}
 \usepackage{FiraMono}
@@ -300,17 +300,17 @@ if the column in question is a math or numeric column.
 
 \m{column spec} defaults to |l| (left-aligned).
 
-\section{The \texttt{mathnotes} document class}
+\section{The \texttt{rbt-mathnotes} document class}
 
 The \mn\ document class is a \ctan{memoir}-based class that automatically loads
 the \mn\ package.
 
-\section{The \texttt{mathnotes-hw} document class}
+\section{The \texttt{rbt-mathnotes-hw} document class}
 
-The |mathnotes-hw| document class is based on the |mathnotes| document class,
-providing additional commands and styles for typesetting homework assignments.
-Theorems are given subtler styling that takes up less space on the page.
-The author name and title are added to the top-left heading.
+The |rbt-mathnotes-hw| document class is based on the |rbt-mathnotes| document
+class, providing additional commands and styles for typesetting homework
+assignments.  Theorems are given subtler styling that takes up less space on
+the page.  The author name and title are added to the top-left heading.
 
 \begin{desc}
 |problem| \\
@@ -342,17 +342,17 @@ contents at the chapter-level, which is the top level if I remember correctly.
 
 If your professor calls them ``exercises'' or something, you can change the
 string used to refer to them with the |\mathnotes| command, which supports an
-additional key in |mathnotes-hw|:
+additional key in |rbt-mathnotes-hw|:
 \begin{keys}
   \key{problem string}[\m{problem string}][Problem]
     The string used to represent a problem in titles and contents entries.
 \end{keys}
 
 \pagebreak
-\section{The \texttt{mathnotes-formula-sheet} document class}
+\section{The \texttt{rbt-mathnotes-formula-sheet} document class}
 
 Sometimes, exams will let you take any formula sheet of a given size as
-reference material. The |mathnotes-formula-sheet| document class (based on the
+reference material. The |rbt-mathnotes-formula-sheet| document class (based on the
 \ctan{article} class) is optimized for getting as much material as possible in
 that area. A tiny |\maketitle| is provided, as well as a tiny |\section|.
 Theorem titles are highly abbreviated (``Thm'' instead of ``Theorem''). Lists

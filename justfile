@@ -1,32 +1,32 @@
 export date := "2021/11/04"
 export version := "1.0.0"
-export package := "mathnotes"
+export package := "rbt-mathnotes"
 
 version_token := '\${VERSION}\$'
 date_token := '\${DATE}\$'
 
 needs_version := "\
-	mathnotes.tex \
-	mathnotes.sty \
-	mathnotes.cls \
-	mathnotes-util.sty \
-	mathnotes-messages.sty \
-	mathnotes-hw.cls \
-	mathnotes-formula-sheet.cls \
+	rbt-mathnotes.tex \
+	rbt-mathnotes.sty \
+	rbt-mathnotes.cls \
+	rbt-mathnotes-util.sty \
+	rbt-mathnotes-messages.sty \
+	rbt-mathnotes-hw.cls \
+	rbt-mathnotes-formula-sheet.cls \
 "
 dist_files := "\
-	mathnotes.tex \
-	mathnotes.sty \
-	mathnotes.cls \
-	mathnotes-util.sty \
-	mathnotes-messages.sty \
-	mathnotes-hw.cls \
-	mathnotes-formula-sheet.cls \
+	rbt-mathnotes.tex \
+	rbt-mathnotes.sty \
+	rbt-mathnotes.cls \
+	rbt-mathnotes-util.sty \
+	rbt-mathnotes-messages.sty \
+	rbt-mathnotes-hw.cls \
+	rbt-mathnotes-formula-sheet.cls \
 	LICENSE.txt \
 	examples \
 "
 needs_latexmk := "\
-	mathnotes.tex \
+	rbt-mathnotes.tex \
 	examples/cheat-sheet.tex \
 	examples/multivar.tex \
 	examples/topology-hw-1.tex \
