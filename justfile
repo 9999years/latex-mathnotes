@@ -1,5 +1,5 @@
-export date := "2021/11/04"
-export version := "1.0.0"
+export date := "2021/11/24"
+export version := "1.0.1"
 export package := "rbt-mathnotes"
 
 version_token := '\${VERSION}\$'
@@ -54,8 +54,6 @@ _dir-pdf:
 
 # remove generated TeX files, recursively
 clean:
-	rm -rf '{{ package }}'
-	rm -rf '{{ package }}.tar.gz'
 	fd . \
 		--no-ignore-vcs \
 		--type f \
@@ -83,3 +81,9 @@ clean:
 		-e "xdv" \
 		-e "tmp" \
 		-X rm {} \;
+
+# Remove generated files and archives as well as build artifacts.
+clean-all:
+	rm -rf '{{ package }}'
+	rm -rf '{{ package }}.tar.gz'
+	just clean

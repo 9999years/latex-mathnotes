@@ -4,6 +4,7 @@
 \usepackage{longtable}
 \usepackage{changepage}
 \usepackage{metalogo}
+\usepackage{changelog}
 \newcommand{\mn}{\ctan{rbt-mathnotes}}
 
 \makeatletter
@@ -380,5 +381,17 @@ output:
   \key{height}[\m{height}][11in]
     Set the paper width and height. The 0.1 inch margins are not customizable.
 \end{keys}
+
+\begin{changelog}[author=Rebecca Turner]
+  \begin{version}[v=1.0.1, date=2021-11-24, short]
+    Renamed package from \texttt{mathnotes} to \texttt{rbt-mathnotes} to avoid
+    a file name conflict with
+    \href{http://mirrors.ctan.org/fonts/newtx/doc/mathnotes.pdf}{\texttt{CTAN:/fonts/newtx/doc/mathnotes.pdf}}.
+  \end{version}
+
+  \begin{version}[v=1.0.0, date=2021-11-04, short]
+    Initial release as \texttt{mathnotes}, documented package.
+  \end{version}
+\end{changelog}
 
 \end{document}
