@@ -54,6 +54,8 @@ _dir-pdf:
 
 # remove generated TeX files, recursively
 clean:
+	rm -rf '{{ package }}'
+	rm -rf '{{ package }}.tar.gz'
 	fd . \
 		--no-ignore-vcs \
 		--type f \
