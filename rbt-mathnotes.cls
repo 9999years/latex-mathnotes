@@ -1,3 +1,4 @@
+%${LICENSE}$
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
 \ProvidesExplClass{rbt-mathnotes}{${DATE}$}{${VERSION}$}{Styles for mathematical

@@ -1,10 +1,13 @@
-export date := "2021/11/24"
-export version := "1.0.1"
+export date := "2021/11/27"
+export version := "1.0.2"
 export package := "rbt-mathnotes"
 
 version_token := '\${VERSION}\$'
 date_token := '\${DATE}\$'
+license_token := '\${LICENSE}\$'
+license_filename_token := '\${FILENAME}\$'
 
+# Filenames to substitute ${VERSION}$ in.
 needs_version := "\
 	rbt-mathnotes.tex \
 	rbt-mathnotes.sty \
@@ -14,6 +17,9 @@ needs_version := "\
 	rbt-mathnotes-hw.cls \
 	rbt-mathnotes-formula-sheet.cls \
 "
+# Must be files or directories in this folder (the repo's top level);
+# `dist_files` is passed as arguments to `cp`, so need to use single names to
+# preserve directory structure.
 dist_files := "\
 	rbt-mathnotes.tex \
 	rbt-mathnotes.sty \
@@ -25,6 +31,21 @@ dist_files := "\
 	README.md \
 	LICENSE.txt \
 	examples \
+"
+# Filenames to substitute ${LICENSE}$ in.
+needs_license := "\
+	rbt-mathnotes.tex \
+	rbt-mathnotes.sty \
+	rbt-mathnotes.cls \
+	rbt-mathnotes-util.sty \
+	rbt-mathnotes-messages.sty \
+	rbt-mathnotes-hw.cls \
+	rbt-mathnotes-formula-sheet.cls \
+	README.md \
+	LICENSE.txt \
+	examples/cheat-sheet.tex \
+	examples/multivar.tex \
+	examples/topology-hw-1.tex \
 "
 needs_latexmk := "\
 	rbt-mathnotes.tex \
@@ -51,6 +72,12 @@ _dir-pdf:
 	&& latexmk -xelatex {{ needs_latexmk }} \
 	&& mv cheat-sheet.pdf multivar.pdf topology-hw-1.pdf examples/ \
 	&& just clean
+
+_license filename:
+	sed --in-place --expression 's`{{ license_token }}`$( just _license-notice {{ filename  }} )`g' {{ filename }}
+
+_license-notice filename:
+	sed --expression 's`{{ license_filename_token}}`{{filename}}`g' license-notice.tpl
 
 
 # remove generated TeX files, recursively

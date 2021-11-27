@@ -1,3 +1,4 @@
+%${LICENSE}$
 \documentclass{ltxguidex}
 
 \errorcontextlines=10
@@ -9,8 +10,8 @@
 
 \makeatletter
 \renewcommand{\SX@explpreset}{
-	language=[LaTeX]TeX,
-	numbers=none,
+  language=[LaTeX]TeX,
+  numbers=none,
 }
 \makeatother
 
@@ -29,9 +30,9 @@
 \usepackage{FiraMono}
 
 \NewDocumentEnvironment{ctandescription}{}
-	{\NewDocumentCommand{\pkg}{m}{\item[\ctan{##1}]}
-	\begin{description}}
-	{\end{description}}
+  {\NewDocumentCommand{\pkg}{m}{\item[\ctan{##1}]}
+  \begin{description}}
+  {\end{description}}
 
 \author{Rebecca Turner\thanks{\email{rbt@sent.as}, \https{becca.ooo}}}
 \title{The \mn\ Package}
@@ -40,13 +41,51 @@
 \maketitle
 
 \begin{abstract}
-	Rebecca Turner's personal macros and styles for typesetting mathematics
-	notes.
+  Rebecca Turner's personal macros and styles for typesetting mathematics
+  notes.
 \end{abstract}
 
 \begin{note}
-	Browse the sources, contribute, or complain at \\
-	\https{github.com/9999years/latex-mathnotes}
+  Browse the sources, contribute, or complain at \\
+  \https{github.com/9999years/latex-mathnotes}
+\end{note}
+
+\begin{note}
+  Copyright 2021 Rebecca B. Turner.
+
+  This work may be distributed and/or modified under the
+  conditions of the LaTeX Project Public License, either version 1.3
+  of this license or (at your option) any later version.
+  The latest version of this license is in
+    \https{www.latex-project.org/lppl.txt}
+  and version 1.3 or later is part of all distributions of LaTeX
+  version 2005/12/01 or later.
+
+  This work has the LPPL maintenance status `maintained'.
+
+  The Current Maintainer of this work is Rebecca B. Turner.
+
+  This work consists of the files:
+    \begin{itemize}
+      \item \texttt{README.md}
+      \item \texttt{rbt-mathnotes.tex}
+      \item \texttt{rbt-mathnotes.sty}
+      \item \texttt{rbt-mathnotes.cls}
+      \item \texttt{rbt-mathnotes-util.sty}
+      \item \texttt{rbt-mathnotes-messages.sty}
+      \item \texttt{rbt-mathnotes-hw.cls}
+      \item \texttt{rbt-mathnotes-formula-sheet.cls}
+      \item \texttt{examples/cheat-sheet.tex}
+      \item \texttt{examples/multivar.tex}
+      \item \texttt{examples/topology-hw-1.tex}
+    \end{itemize}
+  and the derived files:
+    \begin{itemize}
+      \item \texttt{rbt-mathnotes.pdf}
+      \item \texttt{examples/cheat-sheet.pdf}
+      \item \texttt{examples/multivar.pdf}
+      \item \texttt{examples/topology-hw-1.pdf}
+    \end{itemize}
 \end{note}
 
 \tableofcontents
@@ -58,7 +97,7 @@
 Some options are enabled by default, and can be disabled by passing
 |no<option>|. The enabled-by-default options are:
 \begin{keys}
-	\key{fonts}[\bool][true]
+  \key{fonts}[\bool][true]
   \key{stix}[\bool][true]
     \begin{itemize}
       \item In \XeTeX\ or \LuaTeX, loads the \ctan{unicode-math} package, and
@@ -151,7 +190,7 @@ Some options are enabled by default, and can be disabled by passing
 The other options are not enabled by default, and can be enabled by passing
 |<option>| --- the option name --- as a package option:
 \begin{keys}
-	\key{listings}[\bool]
+  \key{listings}[\bool]
     Loads the \ctan{listings} and \ctan{xcolor} packages.
     Sets default styles for listings, including setting the default language to
     |Mathematica|.
@@ -383,6 +422,10 @@ output:
 \end{keys}
 
 \begin{changelog}[author=Rebecca Turner]
+  \begin{version}[v=1.0.2, date=2021-11-27, short]
+    Added license notice to all files.
+  \end{version}
+
   \begin{version}[v=1.0.1, date=2021-11-24, short]
     Renamed package from \texttt{mathnotes} to \texttt{rbt-mathnotes} to avoid
     a file name conflict with

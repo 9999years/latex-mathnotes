@@ -1,3 +1,4 @@
+%${LICENSE}$
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
 \ProvidesExplClass{rbt-mathnotes-hw}{${DATE}$}{${VERSION}$}{Companion styles
