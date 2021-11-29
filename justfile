@@ -7,16 +7,6 @@ date_token := '\${DATE}\$'
 license_token := '\${LICENSE}\$'
 license_filename_token := '\${FILENAME}\$'
 
-# Filenames to substitute ${VERSION}$ in.
-needs_version := "\
-	rbt-mathnotes.tex \
-	rbt-mathnotes.sty \
-	rbt-mathnotes.cls \
-	rbt-mathnotes-util.sty \
-	rbt-mathnotes-messages.sty \
-	rbt-mathnotes-hw.cls \
-	rbt-mathnotes-formula-sheet.cls \
-"
 # Must be files or directories in this folder (the repo's top level);
 # `dist_files` is passed as arguments to `cp`, so need to use single names to
 # preserve directory structure.
@@ -33,7 +23,7 @@ dist_files := "\
 	examples \
 "
 # Filenames to substitute ${LICENSE}$ in.
-needs_license := "\
+needs_substitutions := "\
 	rbt-mathnotes.tex \
 	rbt-mathnotes.sty \
 	rbt-mathnotes.cls \
@@ -61,10 +51,9 @@ dist:
 _dir-no-pdf:
 	mkdir -p '{{ package }}'
 	cp -r -t '{{ package }}' {{ dist_files }}
-	@echo "Replacing version placeholder in distribution files."
+	@echo "Replacing version/date/license placeholders in distribution files."
 	cd '{{ package }}' \
-	&& sed --in-place --expression 's`{{ version_token }}`{{ version }}`g' {{ needs_version }} \
-	&& sed --in-place --expression 's`{{ date_token }}`{{ date }}`g' {{ needs_version }}
+	&& ../substitute.py {{ needs_substitutions }}
 
 _dir-pdf:
 	just _dir-no-pdf
@@ -72,12 +61,6 @@ _dir-pdf:
 	&& latexmk -xelatex {{ needs_latexmk }} \
 	&& mv cheat-sheet.pdf multivar.pdf topology-hw-1.pdf examples/ \
 	&& just clean
-
-_license filename:
-	sed --in-place --expression 's`{{ license_token }}`$( just _license-notice {{ filename  }} )`g' {{ filename }}
-
-_license-notice filename:
-	sed --expression 's`{{ license_filename_token}}`{{filename}}`g' license-notice.tpl
 
 
 # remove generated TeX files, recursively
