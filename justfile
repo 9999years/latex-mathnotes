@@ -1,11 +1,6 @@
-export DATE := "2021/11/27"
+export DATE := "2021/11/29"
 export VERSION := "1.0.2"
 package := "rbt-mathnotes"
-
-version_token := '\${VERSION}\$'
-date_token := '\${DATE}\$'
-license_token := '\${LICENSE}\$'
-license_filename_token := '\${FILENAME}\$'
 
 # Must be files or directories in this folder (the repo's top level);
 # `dist_files` is passed as arguments to `cp`, so need to use single names to
