@@ -1,6 +1,6 @@
-export date := "2021/11/27"
-export version := "1.0.2"
-export package := "rbt-mathnotes"
+export DATE := "2021/11/27"
+export VERSION := "1.0.2"
+package := "rbt-mathnotes"
 
 version_token := '\${VERSION}\$'
 date_token := '\${DATE}\$'

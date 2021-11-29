@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
+import os
 from pathlib import Path
 import sys
 from typing import Union
-
-VERSION = "1.0.2"
-DATE = "2021/11/27"
-PACKAGE = "rbt-mathnotes"
 
 VERSION_TOKEN = "${VERSION}$"
 DATE_TOKEN = "${DATE}$"
@@ -20,8 +17,8 @@ def replace_tokens(path: Union[str, Path]) -> None:
         text = infile.read()
 
     text = (
-        text.replace(VERSION_TOKEN, VERSION)
-            .replace(DATE_TOKEN, DATE)
+        text.replace(VERSION_TOKEN, os.environ['VERSION'])
+            .replace(DATE_TOKEN, os.environ['DATE'])
             .replace(LICENSE_TOKEN, license_notice(Path(path).name))
     )
 
