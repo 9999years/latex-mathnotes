@@ -58,7 +58,7 @@ _dir-no-pdf:
 _dir-pdf:
 	just _dir-no-pdf
 	cd '{{ package }}' \
-	&& latexmk -xelatex {{ needs_latexmk }} \
+	&& latexmk -norc -xelatex {{ needs_latexmk }} \
 	&& mv cheat-sheet.pdf multivar.pdf topology-hw-1.pdf examples/ \
 	&& just clean
 

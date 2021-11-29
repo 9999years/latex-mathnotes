@@ -22,7 +22,7 @@ def replace_tokens(path: Union[str, Path]) -> None:
     text = (
         text.replace(VERSION_TOKEN, VERSION)
             .replace(DATE_TOKEN, DATE)
-            .replace(LICENSE_TOKEN, license_notice(path.name))
+            .replace(LICENSE_TOKEN, license_notice(Path(path).name))
     )
 
     with open(path, 'w', encoding='utf-8') as outfile:
@@ -37,3 +37,6 @@ def license_notice(name: str) -> str:
 def main() -> None:
     for path in sys.argv[1:]:
         replace_tokens(path)
+
+if __name__ == '__main__':
+    main()
